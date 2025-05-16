@@ -13,10 +13,17 @@ export class CameraController extends Component {
     @property(Node)
     drawLayer: Node;
 
+    @property(Camera)
+    drawCamera: Camera;
+
+    @property
+    cameraWheelSpeed: number = 100;
+
     start() {
         this.node.on(NodeEventType.MOUSE_DOWN, this.onTouchDown, this);
         this.node.on(NodeEventType.MOUSE_MOVE, this.onTouchMove, this);
         this.node.on(NodeEventType.MOUSE_UP, this.onTouchUp, this);
+        this.node.on(NodeEventType.MOUSE_WHEEL, this.onMouseWhell, this);
     }
 
     onTouchDown(event: EventMouse) {
@@ -30,6 +37,12 @@ export class CameraController extends Component {
     onTouchUp(event: EventMouse) {
         this.touch(event);
     }
+
+    onMouseWhell(event: EventMouse) {
+        console.log(event);
+        this.touch(event);
+    }
+
 
     private touch(event: EventMouse) {
         const mode = GameMgr.Instance.getGameMode();
@@ -54,9 +67,10 @@ export class CameraController extends Component {
                 this.isDragging = false;
                 break;
             case Input.EventType.MOUSE_WHEEL:
-
-
-                break;
+                const scrollY = event.getScrollY();
+                const upWheel = scrollY > 0;
+                const index = upWheel ? -1 : 1;
+                this.drawCamera.orthoHeight += index * this.cameraWheelSpeed;
         }
     }
 

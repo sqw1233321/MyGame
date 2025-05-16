@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, js, Layout, dynamicAtlasManager, instantiate, director, game, Game } from 'cc';
+import { _decorator, Component, Node, js, Layout, dynamicAtlasManager, instantiate, director, game, Game, Camera } from 'cc';
 import { NodeUtil } from './NodeUtil';
 import { GameMap, MapObjectType } from './GameMap';
 import { AStar } from './AStar';
@@ -11,6 +11,7 @@ import { Player } from './Player';
 import { SettingLayer } from './SettingLayer';
 import { GameMgr, GameMode } from './GameMgr';
 import { CameraController } from './CameraController';
+import { CameraFollwer } from './CameraFollwer';
 const { ccclass, property } = _decorator;
 
 @ccclass('GameStart')
@@ -39,6 +40,12 @@ export class GameStart extends Component {
     @property(CameraController)
     camController: CameraController;
 
+    @property(Camera)
+    camera: Camera;
+
+    @property(CameraFollwer)
+    cameraFollwer: CameraFollwer;
+
     private _size = 0;
     private _map: GameMap;
 
@@ -59,7 +66,15 @@ export class GameStart extends Component {
         this.createCreature();
         const mode = GameMgr.Instance.getGameMode();
         this.camController.enabled = (mode == GameMode.EDITOR);
+        this.cameraFollwer.enabled = (mode == GameMode.PLAY);
         this.setLayer.changeModeLb(mode);
+    }
+
+    protected start(): void {
+        //在onload设置相机会被改回场景初始值
+        const mode = GameMgr.Instance.getGameMode();
+        const value = mode == GameMode.EDITOR ? 1000 : 320;
+        this.camera.orthoHeight = value;
     }
 
     private changeGameMode() {
