@@ -4,7 +4,7 @@
  * 2025.5.16
  */
 
-import { _decorator, Color, Component, director, dynamicAtlasManager, gfx, ImageAsset, math, Node, path, profiler, Sprite, SpriteFrame, Texture2D } from 'cc';
+import { _decorator, Color, Component, director, dynamicAtlasManager, gfx, ImageAsset, math, Node, path, profiler, Size, Sprite, SpriteFrame, Texture2D } from 'cc';
 const { ccclass, property } = _decorator;
 
 interface Point { x: number; y: number };
@@ -44,7 +44,7 @@ export class TextureClip extends Component {
         const texture = this.showSp.spriteFrame.texture;
         const infoTex = this.infoSp.spriteFrame.texture;
         //纹理大小
-        this._textureSize = this.showSp.spriteFrame.originalSize;
+        this._textureSize = new Size(texture.width, texture.height);
         //buffer
         const showBuffer = new Uint8Array(this._textureSize.width * this._textureSize.height * 4);
         const infoBuffer = new Uint8Array(this._textureSize.width * this._textureSize.height * 4);

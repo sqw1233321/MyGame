@@ -1,0 +1,312 @@
+// creat by 陈飞旭
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: sprite-vs:vert
+      frag: sprite-fs:frag
+      depthStencilState:
+        depthTest: false
+        depthWrite: false
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one_minus_src_alpha
+          blendDstAlpha: one_minus_src_alpha
+      rasterizerState:
+        cullMode: none
+      properties:
+        alphaThreshold: { value: 0.1 } 
+        ColorH: { value: 0.0}
+        ColorS: { value: 0.0}
+        ColorV: { value: 0.0}
+        ColorTYPE: { value: 0.0}
+}%
+
+CCProgram sprite-vs %{
+  precision highp float;
+  #include <cc-global>
+  #if USE_LOCAL
+    #include <cc-local>
+  #endif
+  #if SAMPLE_FROM_RT
+    #include <common>
+  #endif
+  in vec3 a_position;
+  in vec2 a_texCoord;
+  in vec4 a_color;
+
+  out vec4 color;
+  out vec2 uv0;
+
+  vec4 vert () {
+    vec4 pos = vec4(a_position, 1);
+
+    #if USE_LOCAL
+      pos = cc_matWorld * pos;
+    #endif
+
+    #if USE_PIXEL_ALIGNMENT
+      pos = cc_matView * pos;
+      pos.xyz = floor(pos.xyz);
+      pos = cc_matProj * pos;
+    #else
+      pos = cc_matViewProj * pos;
+    #endif
+
+    uv0 = a_texCoord;
+    #if SAMPLE_FROM_RT
+      CC_HANDLE_RT_SAMPLE_FLIP(uv0);
+    #endif
+    color = a_color;
+
+    return pos;
+  }
+}%
+
+
+
+CCProgram sprite-fs %{
+  precision highp float;
+  #include <embedded-alpha>
+  #include <alpha-test>
+
+  in vec4 color;
+  in vec2 uv0;
+  #pragma builtin(local)
+  layout(set = 2, binding = 12) uniform sampler2D cc_spriteTexture;
+
+  uniform Constants1 {
+      float ColorH;
+      float ColorS;
+      float ColorV;
+      float ColorTYPE;
+  };
+
+  //1 rgb to hsl
+  vec4 GetColorHSLA(vec4 colorRGBA){
+      float H = 0.0;
+      float S = 0.0;
+      float L = 0.0;
+
+      float r = colorRGBA.r;
+      float g = colorRGBA.g;
+      float b = colorRGBA.b;
+
+      float a = colorRGBA.a;
+
+      float Cmax = max(r, max(g, b));
+      float Cmin = min(r, min(g, b));
+
+      L = (Cmax + Cmin)/2.0;//1
+
+      float offC = Cmax - Cmin;
+      if(offC == 0.0){
+        S = 0.0;
+      }else{
+        S = offC/(1.0-abs(2.0*L-1.0));
+      }
+
+      if(Cmax != 0.0){
+        if(Cmax == r){
+          H = 60.0 * (g - b) / offC;
+        }else if(Cmax == g){
+          H = 60.0 * (b - r) / offC + 120.0;
+        }else{
+          H = 60.0 * (r - g) / offC + 240.0; 
+        }
+      }
+      return vec4(H, S, L, a);
+  }
+
+  //2 add hsv
+  vec4 SetOffHSL(vec3 colorHSV,vec4 colorHSVA){
+      float H = colorHSVA.r;
+      float S = colorHSVA.g;
+      float L = colorHSVA.b;
+
+      H = mod(colorHSVA.r + colorHSV.r,360.0);
+
+      if(colorHSV.g >= 0.0){
+        S = clamp(S /= 1.0 - colorHSV.g, 0.0, 1.0);
+      }else{
+        S = clamp(S *= 1.0 + colorHSV.g, 0.0, 1.0);
+      }
+      L = clamp(colorHSVA.b += colorHSV.b, 0.0, 1.0);
+
+      return vec4(H,S,L,colorHSVA.a);
+  }
+
+
+
+  float hueToRgb(float p, float q, float t) {
+    if (t < 0.0) t += 1.0;
+    if (t > 1.0) t -= 1.0;
+    if (t < 1.0 / 6.0) return p + (q - p) * 6.0 * t;
+    if (t < 0.5) return q;
+    if (t < 2.0 / 3.0) return p + (q - p) * (2.0 / 3.0 - t) * 6.0;
+    return p;
+  }
+
+    //3 hsl to rgb
+  vec4 GetLColorRGBA(vec4 colorHSVL){
+    float r, g, b;
+    float h = colorHSVL.x/360.0;
+    float s = colorHSVL.y;
+    float l = colorHSVL.z;
+
+    if (s == 0.0) {
+        r = g = b = l; // 当饱和度为0时，颜色为灰色
+    } else {
+        float q = l < 0.5 ? l * (1.0 + s) : l + s - l * s;
+        float p = 2.0 * l - q;
+        r = hueToRgb(p, q, h + 1.0 / 3.0);
+        g = hueToRgb(p, q, h);
+        b = hueToRgb(p, q, h - 1.0 / 3.0);
+    }
+    return vec4(r, g, b,colorHSVL.a);
+  }
+
+  //1 rgb to hsv
+  vec4 GetColorHSVA(vec4 colorRGBA){
+      float H = 0.0;
+      float S = 0.0;
+      float V = 0.0;
+
+      float r = colorRGBA.r;
+      float g = colorRGBA.g;
+      float b = colorRGBA.b;
+      float a = colorRGBA.a;
+
+      float Cmax = max(r, max(g, b));
+      float Cmin = min(r, min(g, b));
+      float offC = Cmax - Cmin;
+
+      V = Cmax;
+      if(Cmax != 0.0){
+          S = offC / Cmax;
+      }
+      if(offC == 0.0){ 
+        H = 0.0;
+      }else if(Cmax == r){
+        H = (g - b) / offC;
+      }else if(Cmax == g){
+        H = (b - r) / offC + 2.0;
+      }else{
+        H = (r - g) / offC + 4.0;
+      }
+
+      H *= 60.0;
+      return vec4(H, S, V, a);
+  }
+
+  //2 add hsv
+  vec4 SetOffHSV(vec3 colorHSV,vec4 colorHSVA){
+      float H = colorHSVA.r;
+      float S = colorHSVA.g;
+      float V = colorHSVA.b;
+
+      H = mod(colorHSVA.r + colorHSV.r,360.0);
+      S = clamp(colorHSVA.g *= (1.0 + colorHSV.g), 0.0, 1.0);
+      V = clamp(colorHSVA.b *= (1.0 + colorHSV.b), 0.0, 1.0);
+
+      return vec4(H,S,V,colorHSVA.a);
+  }
+
+  //3 hsv to rgb
+  vec4 GetColorRGBA(vec4 colorHSVA){
+      float H = colorHSVA.r;
+      H = mod(H,360.0);
+      float S = colorHSVA.g;
+      float V = colorHSVA.b;
+      float i = floor(mod(H/60.0,6.0));
+      float f = H/60.0 - i;
+
+      float p = V * (1.0 - S);
+      float q = V * (1.0 - S * f);
+      float t = V * (1.0 - S * (1.0 - f));
+
+      float r,g,b;
+      if(i == 0.0){
+        r = V;g = t;b = p;
+      }else if(i == 1.0){
+        r = q;g = V;b = p;
+      }else if(i == 2.0){
+        r = p;g = V;b = t;
+      }else if(i == 3.0){
+        r = p;g = q;b = V;
+      }else if(i == 4.0){
+        r = t;g = p;b = V;
+      }else if(i == 5.0){
+        r = V;g = p;b = q;
+      }
+      return vec4(r, g, b, colorHSVA.a);
+  }
+
+  vec4 rgbAddHSVA(vec4 colorRGBA,vec3 colorHSV){ 
+      vec4 colorHSVA = GetColorHSVA(colorRGBA);
+      colorHSVA = SetOffHSV(colorHSV,colorHSVA);
+      colorRGBA = GetColorRGBA(colorHSVA);
+      return colorRGBA;
+  }
+
+  vec4 rgbAddHSLA(vec4 colorRGBA,vec3 colorHSL){ 
+      vec4 colorHSVA = GetColorHSLA(colorRGBA);
+      colorHSVA = SetOffHSL(colorHSL,colorHSVA);
+      colorRGBA = GetLColorRGBA(colorHSVA);
+      return colorRGBA;
+  }
+
+  vec4 getGrayScale(vec4 colorRGBA,vec3 colorHSL){
+      float grayR = colorRGBA.r * (1.0+(colorHSL.r+180.0)/360.0);
+      float grayG = colorRGBA.g * (1.0+colorHSL.g);
+      float grayB = colorRGBA.b * (1.0+colorHSL.b);
+      float gray = (grayR+grayG+grayB)/3.0;
+      return vec4(gray, gray, gray, colorRGBA.a);
+  }
+
+  vec4 getGrayScale2(vec4 colorRGBA,vec3 colorHSL){
+      float h = colorHSL.r;
+      float s = colorHSL.g;
+      float l = colorHSL.b;
+
+      // if(l>0.0){
+      //   float gray = l;
+      //   vec4 grayVec = vec4(gray, gray, gray, colorRGBA.a);
+      //   //滤色
+      //   colorRGBA = colorRGBA + grayVec - (colorRGBA*grayVec);
+      // }else{
+        float gray = l + 1.0;
+        vec4 grayVec = vec4(gray, gray, gray, colorRGBA.a);
+        colorRGBA =  (colorRGBA*grayVec);
+      // }
+      colorRGBA = rgbAddHSLA(colorRGBA,colorHSL);
+      return colorRGBA;
+  }
+
+
+
+  vec4 frag () {
+    vec4 colorRGBA = vec4(1, 1, 1, color.a);
+    colorRGBA *= CCSampleWithAlphaSeparated(cc_spriteTexture, uv0);
+    // colorRGBA = color;
+    
+    if(ColorTYPE < 1.0){
+        colorRGBA = rgbAddHSVA(colorRGBA,vec3(ColorH, ColorS, ColorV));
+    }else if (ColorTYPE < 2.0){
+        colorRGBA = rgbAddHSLA(colorRGBA,vec3(ColorH, ColorS, ColorV));
+    }else if (ColorTYPE < 3.0){
+        colorRGBA = getGrayScale(colorRGBA,vec3(ColorH, ColorS, ColorV));
+    }else if (ColorTYPE < 4.0){
+        colorRGBA = getGrayScale2(colorRGBA,vec3(ColorH, ColorS, ColorV));
+    }
+    colorRGBA *= colorRGBA.a;
+    ALPHA_TEST(colorRGBA);
+    return colorRGBA;
+  }
+  
+
+
+}%
+
+ 

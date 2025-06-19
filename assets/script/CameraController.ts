@@ -50,7 +50,7 @@ export class CameraController extends Component {
         const type: Input.EventType = event.getType() as Input.EventType;
         switch (type) {
             case Input.EventType.MOUSE_DOWN:
-                if (event.getButton() != 2) return;
+                if (event.getButton() != 0) return;
                 this.isDragging = true;
                 this.lastPos.set(event.getLocationX(), event.getLocationY(), 0);
                 break;
@@ -63,7 +63,7 @@ export class CameraController extends Component {
                 break;
 
             case Input.EventType.MOUSE_UP:
-                if (event.getButton() != 2) return;
+                if (event.getButton() != 0) return;
                 this.isDragging = false;
                 break;
             case Input.EventType.MOUSE_WHEEL:
