@@ -3,8 +3,10 @@
     创建人: yjy
     创建时间: 2021.9.23
 */
+export interface AllEvent {
 
-import { AllEvent } from "../common/Event";
+}
+
 
 export default class CustomEventTarget {
     private static s_targetInfos: { target: Object, eventTargets: CustomEventTarget[] }[] = [];

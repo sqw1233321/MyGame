@@ -1,0 +1,160 @@
+// creat by 陈飞旭
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: sprite-vs:vert
+      frag: sprite-fs:frag
+      depthStencilState:
+        depthTest: false
+        depthWrite: false
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one_minus_src_alpha
+          blendDstAlpha: one_minus_src_alpha
+      rasterizerState:
+        cullMode: none
+      properties:
+        # alphaThreshold: { value: 0.5 } ,
+        lightAngle: { value: 70} #0~180
+        lightWidth: { value: 0.3} #0~180
+        lightTime: {value: 2.0}
+        lightInterval: { value: 1.0} #0~180
+        spriteFrameUv: { value: [0.0,1.0,0.0,1.0]} #0~1
+        spriteRotated: { value: -1.0} #0~1
+        testTime: { value: -1.0} #0~4
+}%
+
+CCProgram sprite-vs %{
+  precision highp float;
+  #include <cc-global>
+  #if USE_LOCAL
+    #include <cc-local>
+  #endif
+  #if SAMPLE_FROM_RT
+    #include <common>
+  #endif
+  in vec3 a_position;
+  in vec2 a_texCoord;
+  in vec4 a_color;
+  
+
+  out vec4 color;
+  out vec2 uv0;
+  out vec4 v_time;
+
+  vec4 vert () {
+    vec4 pos = vec4(a_position, 1);
+
+    #if USE_LOCAL
+      pos = cc_matWorld * pos;
+    #endif
+
+    #if USE_PIXEL_ALIGNMENT
+      pos = cc_matView * pos;
+      pos.xyz = floor(pos.xyz);
+      pos = cc_matProj * pos;
+    #else
+      pos = cc_matViewProj * pos;
+    #endif
+
+    uv0 = a_texCoord;
+    #if SAMPLE_FROM_RT
+      CC_HANDLE_RT_SAMPLE_FLIP(uv0);
+    #endif
+    v_time = cc_time;
+    color = a_color;
+
+    return pos;
+  }
+}%
+
+
+
+CCProgram sprite-fs %{
+  precision highp float;
+  #include <embedded-alpha>
+  #include <alpha-test>
+
+  in vec4 color;
+  in vec2 uv0;
+  in vec4 v_time;
+  #pragma builtin(local)
+  layout(set = 2, binding = 12) uniform sampler2D cc_spriteTexture;
+
+  uniform Constants1 {
+    vec4 spriteFrameUv;
+    float spriteRotated; 
+    float lightTime;
+    float lightInterval;
+    float lightAngle;
+    float lightWidth;
+    float testTime;
+  };
+  vec4 frag () {
+    vec4 o = vec4(1, 1, 1, 1);
+    o *= CCSampleWithAlphaSeparated(cc_spriteTexture, uv0);
+    // if(uv0.x >0.5 || uv0.y > 0.5){
+    //   o.w = 0.0;
+    // }
+
+    // float gray  = 0.2126 * o.r + 0.7152 * o.g + 0.0722 * o.b;
+    // o.r = o.g = o.b = gray;
+    float pi = 3.1415;
+    float xmin = spriteFrameUv.x;
+    float xmax = spriteFrameUv.y;
+    float ymin = spriteFrameUv.z;
+    float ymax = spriteFrameUv.w;
+    float tan0 = tan(lightAngle/180.0 * pi);
+
+    float lightWidthTrans = abs(xmax - xmin)*lightWidth;
+    float ycir = (ymax+ymin)/2.0;
+    float offetx = abs((ymax-ycir)/tan0);
+    float time1 = lightTime;
+    float inter = lightInterval;
+
+    //testTime = -1 and [0,1]
+    float timex = mix(testTime*(time1 + inter),v_time.x,step(testTime,0.0));
+
+    float nowTime = mod(timex,(time1+inter));
+    float allOffetX = (abs(xmax-xmin)+2.0*offetx)*(1.0+inter/time1);
+    float lightTimeX = nowTime / (time1+inter) * allOffetX;
+
+    vec2 uvCir0 = vec2(xmin+(lightTimeX-offetx),ycir);
+    float x1 = uv0.x;
+    float y1 = ymax + ymin - uv0.y;
+    
+    float x2 = uv0.y - ymin + xmin;
+    float y2 = uv0.x - xmin + ymin;
+
+    //spriteRotated = -1,1
+    float x = mix(x2,x1,step(spriteRotated,0.0));
+    float y = mix(y2,y1,step(spriteRotated,0.0));
+
+    //l = |tan0x - y + y_0 - tan0*x_0|/sqrt(1+exp2(tan0)) //直线距离公式求解所得
+    float l = abs(tan0*x - y + uvCir0.y - tan0*uvCir0.x)/sqrt(1.0+pow(tan0,2.0));
+    float powerL = 1.0 - smoothstep(0.0,lightWidthTrans/2.0,l);
+    vec4 lightColor = vec4(1.0,1.0,1.0,1.0);
+    lightColor = vec4(o);
+    lightColor *= powerL;
+    // vec4 lightColorEnd = lightColor * powerL;
+    // float l2 = sqrt(pow(x-uvCir0.x,2)+pow(y-uvCir0.y,2));
+    // // if(x<0.5 && y<0.5){
+    // if(l2<1.3){
+    //   o*= 0.0;
+    //   return o;
+    // }
+
+    // float powerL2 = 1.0 - smoothstep(0.0,width/2.0,l2);
+    // vec4 lightColor = vec4(1.0,1.0,1.0,1.0)*powerL2;
+    //o = lightColor;
+    o = o + lightColor*(lightColor.a);
+    // o.a = lightColor.a;
+    // o = o + lightColor;
+
+    // o *= color;
+    ALPHA_TEST(o);
+    return o;
+  }
+}%

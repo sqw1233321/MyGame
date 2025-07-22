@@ -1,0 +1,55 @@
+
+hallogodhood_3.png
+size: 547,274
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+ball
+  rotate: false
+  xy: 258, 146
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+flash
+  rotate: false
+  xy: 258, 16
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+glow
+  rotate: false
+  xy: 388, 146
+  size: 128, 128
+  orig: 128, 128
+  offset: 0, 0
+  index: -1
+lizi
+  rotate: false
+  xy: 468, 0
+  size: 64, 64
+  orig: 64, 64
+  offset: 0, 0
+  index: -1
+ring
+  rotate: false
+  xy: 0, 18
+  size: 256, 256
+  orig: 256, 256
+  offset: 0, 0
+  index: -1
+tmcl_icon_big_light
+  rotate: false
+  xy: 388, 65
+  size: 78, 79
+  orig: 78, 79
+  offset: 0, 0
+  index: -1
+tmcl_icon_big_light_glow
+  rotate: true
+  xy: 468, 66
+  size: 78, 79
+  orig: 78, 79
+  offset: 0, 0
+  index: -1

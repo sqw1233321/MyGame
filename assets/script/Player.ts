@@ -2,14 +2,11 @@ import { _decorator, Component, EventKeyboard, input, Input, KeyCode, Node, Vec3
 import { CreatureObject } from './CreatureObject';
 import { GameEvent, GlobalEventTarget } from './event/GlobalEventTarget';
 import { MapUtil } from './MapUtil';
+import { Coordinate } from './GameObject';
 const { ccclass, property } = _decorator;
 
 @ccclass('Player')
 export class Player extends CreatureObject {
-    @property
-    public moveSpeed: number = 200; // 每秒移动多少像素
-
-    private direction = new Vec3(0, 0, 0);
     private keyMap: { [key: number]: boolean } = {};
 
     onEnable() {
@@ -31,17 +28,25 @@ export class Player extends CreatureObject {
     }
 
     update(dt: number) {
-        this.direction.set(0, 0, 0);
-        if (this.keyMap[KeyCode.KEY_W]) this.direction.y += 1;
-        if (this.keyMap[KeyCode.KEY_S]) this.direction.y -= 1;
-        if (this.keyMap[KeyCode.KEY_A]) this.direction.x -= 1;
-        if (this.keyMap[KeyCode.KEY_D]) this.direction.x += 1;
-
-        if (this.direction.lengthSqr() > 0) {
-            this.direction.normalize();
-            this.node.setPosition(this.node.position.clone().add(this.direction.multiplyScalar(this.moveSpeed * dt)));
-            GlobalEventTarget.emit(GameEvent.AStarStart, MapUtil.worldVecInvertCord(this.node.getWorldPosition()));
+        if (this._isMove) return;
+        const nowCord = this.getCoordinate();
+        const noxX = nowCord.x;
+        const noxY = nowCord.y;
+        const newCord: Coordinate = { x: noxX, y: noxY };
+        if (this.keyMap[KeyCode.KEY_W]) newCord.y -= 1;
+        else if (this.keyMap[KeyCode.KEY_S]) newCord.y += 1;
+        else if (this.keyMap[KeyCode.KEY_A]) newCord.x -= 1;
+        else if (this.keyMap[KeyCode.KEY_D]) newCord.x += 1;
+        if (nowCord.x == newCord.x && nowCord.y == newCord.y) return;
+        const canGo = MapUtil.getCanGoByCoordinate(newCord);
+        console.log(`nowCord: {x:${nowCord.x} y:${nowCord.y}}  newCord: {x:${newCord.x} y:${newCord.y}}`);
+        if (!canGo) {
+            console.log("不能走")
+            return;
         }
+        const localPos = MapUtil.cordInvetLocalPosVec(this.node.parent, newCord);
+        this.move(localPos);
+        GlobalEventTarget.emit(GameEvent.AStarStart, newCord);
     }
 }
 
