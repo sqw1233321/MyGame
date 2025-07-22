@@ -1,13 +1,12 @@
-
 import { TouchThrough } from "../TouchThrough";
-import * as SplitHelper from "./helper"
+import * as SplitHelper from "./helper";
 import { splitNd } from "./splitNd";
-import { SplitRender } from './SplitRender';
+import { SplitRender } from "./SplitRender";
 
-import { _decorator, Component, Node, Texture2D, Graphics, Vec2, view, Vec3, SpriteFrame, EventTouch, v2, tween, Camera, color, Layers, profiler } from 'cc';
+import { _decorator, Component, Node, Texture2D, Graphics, Vec2, view, Vec3, SpriteFrame, EventTouch, v2, tween, Camera, color, Layers, profiler, UITransform } from "cc";
 const { ccclass, property, executeInEditMode } = _decorator;
 
-@ccclass('ToolsSplit')
+@ccclass("ToolsSplit")
 export default class ToolsSplit extends Component {
     @property(Node)
     textureRoot: Node = null;
@@ -38,7 +37,7 @@ export default class ToolsSplit extends Component {
         node.layer = Layers.Enum.UI_2D;
         t.spriteFrame = this.pic;
         this.textures.push(t);
-        node.name = `node_0`
+        node.name = `node_0`;
         node.addComponent(splitNd);
         node.addComponent(TouchThrough);
     }
@@ -61,19 +60,29 @@ export default class ToolsSplit extends Component {
         this.useLineCutPolygon(this.startPoint, this.endPoint);
     }
 
-    private doSplit() {
-        let h = this.pic.height, w = this.pic.width;
-        for (let i = 0; i < 15; i++) {
-            let p0 = v2(-(w / 2 + 10), (Math.random() * h) - h / 2);
-            let p1 = v2(w / 2 + 10, (Math.random() * h) - h / 2);
-            this.useLineCutPolygon(p0, p1, false);
-        }
+    private doSplit(param: EventTouch) {
+        const loc = param.getUILocation();
+        const btnNd = param.currentTarget as Node;
+        const anchor = btnNd.getComponent(UITransform).anchorPoint;
+        const btnPos = btnNd.getWorldPosition();
+        const leftX = btnPos.x - anchor.x * btnNd.getComponent(UITransform).width;
+        const upY = btnPos.y + (1 - anchor.y) * btnNd.getComponent(UITransform).height;
+        //获得左上角坐标
+        const leftPos = new Vec2(leftX, upY);
+        const offset = new Vec2(loc.x - leftPos.x, loc.y - leftPos.y);
+        console.log(offset.toString());
+        // let h = this.pic.height, w = this.pic.width;
+        // for (let i = 0; i < 15; i++) {
+        //     let p0 = v2(-(w / 2 + 10), (Math.random() * h) - h / 2);
+        //     let p1 = v2(w / 2 + 10, (Math.random() * h) - h / 2);
+        //     this.useLineCutPolygon(p0, p1, false);
+        // }
 
-        for (let i = 0; i < 15; i++) {
-            let p0 = v2(Math.random() * w - w / 2, -(h / 2 + 10));
-            let p1 = v2(Math.random() * w - w / 2, (h / 2 + 10));
-            this.useLineCutPolygon(p0, p1, false);
-        }
+        // for (let i = 0; i < 15; i++) {
+        //     let p0 = v2(Math.random() * w - w / 2, -(h / 2 + 10));
+        //     let p1 = v2(Math.random() * w - w / 2, (h / 2 + 10));
+        //     this.useLineCutPolygon(p0, p1, false);
+        // }
     }
 
     public useLineCutPolygon(p0: Vec2, p1: Vec2, isWorld = true) {
@@ -104,7 +113,7 @@ export default class ToolsSplit extends Component {
             t.polygon = polygons[i];
             this.textures.push(t);
             node.addComponent(splitNd);
-            node.name = `node_${node.getSiblingIndex()}`
+            node.name = `node_${node.getSiblingIndex()}`;
         }
         for (let i = 0; i < this.textures.length; i++) {
             let nd = this.textures[i].node;
@@ -116,7 +125,9 @@ export default class ToolsSplit extends Component {
         for (let i = 0; i < this.textures.length; i++) {
             let center = this.getPolygonCenter(this.textures[i].polygon);
             let dir = center.normalize();
-            tween(this.textures[i].node).by(0.5, { position: new Vec3(dir.x * 100, dir.y * 100, 0) }).start();
+            tween(this.textures[i].node)
+                .by(0.5, { position: new Vec3(dir.x * 100, dir.y * 100, 0) })
+                .start();
         }
     }
 
@@ -124,21 +135,27 @@ export default class ToolsSplit extends Component {
         for (let i = 0; i < this.textures.length; i++) {
             let center = this.getPolygonCenter(this.textures[i].polygon);
             let dir = center.normalize();
-            tween(this.textures[i].node).by(0.5, { position: new Vec3(-dir.x * 100, -dir.y * 100, 0) }).call(() => {
-                if (i === this.textures.length - 1) {
-                    this.textureRoot.destroyAllChildren();
-                    this.textureRoot.removeAllChildren();
-                    this.textures = [];
-                    this.init();
-                }
-            }).start();
+            tween(this.textures[i].node)
+                .by(0.5, { position: new Vec3(-dir.x * 100, -dir.y * 100, 0) })
+                .call(() => {
+                    if (i === this.textures.length - 1) {
+                        this.textureRoot.destroyAllChildren();
+                        this.textureRoot.removeAllChildren();
+                        this.textures = [];
+                        this.init();
+                    }
+                })
+                .start();
         }
     }
 
     onFallDown() {
         for (let i = 0; i < this.textures.length; i++) {
             let center = this.getPolygonCenter(this.textures[i].polygon);
-            tween(this.textures[i].node).delay((center.y + this.pic.height) / this.pic.height).by(2, { position: new Vec3(0, -500, 0) }, { easing: 'circIn' }).start();
+            tween(this.textures[i].node)
+                .delay((center.y + this.pic.height) / this.pic.height)
+                .by(2, { position: new Vec3(0, -500, 0) }, { easing: "circIn" })
+                .start();
         }
     }
     onResetFallDown() {
@@ -149,13 +166,14 @@ export default class ToolsSplit extends Component {
     }
 
     private getPolygonCenter(polygon: Vec2[]) {
-        let x = 0, y = 0;
+        let x = 0,
+            y = 0;
         for (let i = 0; i < polygon.length; i++) {
             x += polygon[i].x;
             y += polygon[i].y;
         }
         x = x / polygon.length;
         y = y / polygon.length;
-        return v2(x, y)
+        return v2(x, y);
     }
 }

@@ -1,9 +1,11 @@
-import { _decorator, Color, Component, director, gfx, math, Node, Size } from 'cc';
+//像素检测
+//hhy
+//2025.6.24
+import { _decorator, Color, Component, director, gfx, math, Node, Size } from "cc";
 const { ccclass, property } = _decorator;
 
-@ccclass('TextureAnalysis')
+@ccclass("TextureAnalysis")
 export class TextureAnalysis {
-
     private _texture;
 
     private _region;
@@ -38,12 +40,12 @@ export class TextureAnalysis {
         director.root!.device.copyTextureToBuffers(texture.getGFXTexture()!, [this._buffer], [this._region]);
     }
 
-    public getPiexlsByRGBA(dat: { r?: number; g?: number; b?: number; a?: number }, equal = true): { x: number; y: number, color: Color }[] {
+    public getPiexlsByRGBA(dat: { r?: number; g?: number; b?: number; a?: number }, equal = true): { x: number; y: number; color: Color }[] {
         const channelIndexMap = { r: 0, g: 1, b: 2, a: 3 } as const;
         const height = this._region.texExtent.height;
         const width = this._region.texExtent.width;
         const buffer = this._buffer;
-        let res: { x: number; y: number, color: Color }[] = [];
+        let res: { x: number; y: number; color: Color }[] = [];
         for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
                 const i = (y * width + x) * 4;
@@ -66,7 +68,4 @@ export class TextureAnalysis {
         }
         return res;
     }
-
 }
-
-

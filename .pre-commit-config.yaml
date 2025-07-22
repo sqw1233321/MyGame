@@ -1,0 +1,34 @@
+exclude: .meta|.prefab|.scene|.python|ProNetMes\.ts|LanguageKeys\.ts|JsonInterface\.ts|assets/script/framework/protobuff/|assets/resources/i18n|ConfigManager\.ts
+files: ^assets/   #只有assets目下的文件检查
+repos:
+
+  - repo: local
+    hooks:
+      - id: check-unpulled-commits
+        name: 检查当前分支是否有未拉取的远程提交
+        language: system
+        entry: python python/check_unpulled_commits_py2.py
+        always_run: true  # 始终运行此钩子
+        pass_filenames: false  # 不需要传递文件名参数
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.1.0
+    hooks:
+      - id: trailing-whitespace
+        name: 移除行尾多余的空
+        files: \.[jt]sx?$
+      - id: check-merge-conflict
+        name: 检查代码中是否有未解决的合并冲突标记
+        files: \.[jt]sx?$
+      - id: check-added-large-files
+        name: 检查添加的文件是否过大
+        args: [--maxkb=2048] # 2MB
+        files: \.(jpeg|jpg|png)$
+
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.0.3  # 使用最新 Prettier 版本
+    hooks:
+      - id: prettier
+        name: 代码格式化
+        files: \.(ts)$
+        args: [--write, --no-use-tabs, --tab-width=4, --print-width=200]

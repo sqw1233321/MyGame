@@ -4,7 +4,7 @@
   "_objFlags": 0,
   "_native": "",
   "_effectAsset": {
-    "__uuid__": "1fe22dbd-c50c-4350-a4df-3feb85b80513",
+    "__uuid__": "acd46e50-25f9-4bbf-83e5-6880688ac97d",
     "__expectedType__": "cc.EffectAsset"
   },
   "_techIdx": 0,
@@ -27,15 +27,16 @@
   ],
   "_props": [
     {
+      "uvThreshold": 0.76,
       "outlineColor": {
         "__type__": "cc.Vec4",
-        "x": 1,
-        "y": 1,
-        "z": 1,
+        "x": 0,
+        "y": 0,
+        "z": 0,
         "w": 1
       },
-      "outlineWidth": 1,
-      "aplhaThrold": 0.42,
+      "outlineWidth": 2,
+      "aplhaThrold": 0.99,
       "u_scale": 0
     }
   ]

@@ -1,15 +1,10 @@
-import * as SplitHelper from "./helper";
-import { _decorator, Node, Renderable2D, Vec3, IAssembler, ccenum, Vec2, Mat4, Texture2D, v2, v3, EventTouch, gfx, SpriteFrame } from "cc";
+import { _decorator, Component, IAssembler, Node, Renderable2D, SpriteFrame } from "cc";
+const { ccclass, property } = _decorator;
 
-const { ccclass, property, executeInEditMode } = _decorator;
-
-const vec3_temps: Vec3[] = [];
-for (let i = 0; i < 4; i++) {
-    vec3_temps.push(new Vec3());
-}
+//精灵堆叠
 
 class AssemblerSplit implements IAssembler {
-    createData(com: SplitRender) {
+    createData(com: TestSpriteStack) {
         let vertexCount = 4;
         let indexCount = 6;
 
@@ -20,7 +15,7 @@ class AssemblerSplit implements IAssembler {
     }
 
     //render2D的renderDataFlag为true
-    updateRenderData(com: SplitRender) {
+    updateRenderData(com: TestSpriteStack) {
         // dynamicAtlasManager.packToDynamicAtlas(com, frame);
         const renderData = com.renderData;
         if (renderData.vertDirty) {
@@ -32,7 +27,7 @@ class AssemblerSplit implements IAssembler {
         }
     }
 
-    resetData(com: SplitRender) {
+    resetData(com: TestSpriteStack) {
         let points = com.polygon;
         if (!points || points.length < 3) return;
 
@@ -47,7 +42,7 @@ class AssemblerSplit implements IAssembler {
         com.renderData.material = material;
     }
 
-    updateVertexData(com: SplitRender) {
+    updateVertexData(com: TestSpriteStack) {
         const renderData = com.renderData;
         if (!renderData) {
             return;
@@ -73,7 +68,7 @@ class AssemblerSplit implements IAssembler {
         }
     }
 
-    updateUvs(com: SplitRender) {
+    updateUvs(com: TestSpriteStack) {
         let uvOffset = 3,
             floatsPerVert = 9;
         const vData = com.renderData.chunk.vb;
@@ -91,7 +86,7 @@ class AssemblerSplit implements IAssembler {
         }
     }
 
-    updateColor(com: SplitRender) {
+    updateColor(com: TestSpriteStack) {
         const renderData = com.renderData!;
 
         let colorOffset = 5,
@@ -115,7 +110,7 @@ class AssemblerSplit implements IAssembler {
     }
 
     //render2D的renderFlag为true
-    fillBuffers(com: SplitRender, renderer: any) {
+    fillBuffers(com: TestSpriteStack, renderer: any) {
         const chunk = com.renderData.chunk;
         // indices generated
         let indicesArr = SplitHelper.splitPolygon(com.polygon);
@@ -137,7 +132,7 @@ class AssemblerSplit implements IAssembler {
         //console.log(" indicesArr is ", indicesArr, " vid is ", vid, "  indexoffset is ", indexOffset, "  total ib is  ", chunk.vertexAccessor.getIndexBuffer(bid));
     }
 
-    updateWorldVerts(com: SplitRender, verts: Float32Array) {
+    updateWorldVerts(com: TestSpriteStack, verts: Float32Array) {
         let floatsPerVert = 9;
 
         let matrix: Mat4 = com.node.worldMatrix;
@@ -168,173 +163,12 @@ class AssemblerSplit implements IAssembler {
     }
 }
 
-enum TextureType {
-    Cut, // 裁剪
-    Stretch, // 拉伸, 暂未实现
-}
-ccenum(TextureType);
-
-let _vec2_temp = new Vec2();
-let _mat4_temp = new Mat4();
-
-@ccclass("SplitRender")
-@executeInEditMode
-export class SplitRender extends Renderable2D {
-    static Type = TextureType;
-
+@ccclass("TestSpriteStack")
+export class TestSpriteStack extends Renderable2D {
     @property({ type: SpriteFrame, serializable: true })
     protected _spriteFrame: SpriteFrame | null = null;
     @property({ type: SpriteFrame, serializable: true })
     get spriteFrame() {
         return this._spriteFrame;
-    }
-
-    set spriteFrame(value) {
-        if (!value || this._spriteFrame === value) {
-            this._spriteFrame = value;
-            return;
-        }
-
-        this._spriteFrame = value;
-
-        let l = -value.width / 2,
-            b = -value.height / 2,
-            t = value.height / 2,
-            r = value.width / 2;
-        this.polygon = [v2(l, b), v2(r, b), v2(r, t), v2(l, t)];
-
-        this.markForUpdateRenderData(false);
-        this._applySpriteSize();
-    }
-
-    @property({ type: TextureType, serializable: true })
-    _type: TextureType = 0;
-    @property({ type: TextureType, serializable: true })
-    get type() {
-        return this._type;
-    }
-    set type(val: TextureType) {
-        this._type = val;
-        this.markForUpdateRenderData();
-    }
-
-    @property
-    editing: boolean = false;
-
-    @property({ type: [Vec2], serializable: true })
-    _polygon: Vec2[] = [];
-    @property({ type: [Vec2], serializable: true })
-    public get polygon() {
-        return this._polygon;
-    }
-    public set polygon(points: Vec2[]) {
-        this._polygon = points;
-        this.markForUpdateRenderData();
-    }
-
-    protected _assembler: IAssembler = null;
-
-    constructor() {
-        super();
-    }
-
-    protected _flushAssembler(): void {
-        if (this._assembler == null) {
-            this.destroyRenderData();
-            this._assembler = new AssemblerSplit();
-        }
-
-        if (!this.renderData) {
-            if (this._assembler && this._assembler.createData) {
-                this._renderData = this._assembler.createData(this);
-                this.renderData!.material = this.getRenderMaterial(0);
-                this.markForUpdateRenderData();
-                this._updateColor();
-            }
-        }
-    }
-
-    onLoad() {
-        //this._renderEntity.setNode(this.node);
-        this.node["_hitTest"] = this._hitTest.bind(this);
-    }
-
-    start() {
-        // this.node.on(Node.EventType.TOUCH_START, (e: EventTouch) => {
-        //     console.log("click texture plus -");
-        // }, this);
-        // this.node.on(Node.EventType.TOUCH_MOVE, (e: EventTouch) => {
-        //     console.log("click texture plus +");
-        //     this.node.setPosition(v3(this.node.position.x + e.getDeltaX(),
-        //         this.node.position.y + e.getDeltaY(),
-        //         this.node.position.z));
-        // }, this);
-        //console.log(this.node.uuid);
-    }
-
-    _hitTest(cameraPt: Vec2) {
-        let node = this.node;
-        let testPt = _vec2_temp;
-
-        node.updateWorldTransform();
-        // If scale is 0, it can't be hit.
-        if (!Mat4.invert(_mat4_temp, node.worldMatrix)) {
-            return false;
-        }
-
-        Vec2.transformMat4(testPt, cameraPt, _mat4_temp);
-        return SplitHelper.isInPolygon(testPt, this.polygon);
-    }
-
-    private _applySpriteSize() {
-        if (this._spriteFrame) {
-            const size = this._spriteFrame.originalSize;
-            this.node._uiProps.uiTransformComp!.setContentSize(size);
-        }
-
-        this._activateMaterial();
-    }
-
-    private _activateMaterial() {
-        const spriteFrame = this._spriteFrame;
-        const material = this.getRenderMaterial(0);
-        if (spriteFrame) {
-            if (material) {
-                this.markForUpdateRenderData();
-            }
-        }
-
-        if (this.renderData) {
-            this.renderData.material = material;
-        }
-    }
-
-    protected _render(render: any) {
-        render.commitComp(this, this.renderData, this._spriteFrame, this._assembler!);
-    }
-
-    protected _canRender() {
-        if (!super._canRender()) {
-            return false;
-        }
-
-        const spriteFrame = this._spriteFrame;
-        if (!spriteFrame || !spriteFrame.texture) {
-            return false;
-        }
-
-        return true;
-    }
-
-    protected updateMaterial() {
-        if (this._customMaterial) {
-            this.setMaterial(this._customMaterial, 0);
-            // this._customMaterial.overridePipelineStates({ priority: 128 }, 0);
-            // this._blendHash = -1;
-            return;
-        }
-        const mat = this._updateBuiltinMaterial();
-        this.setMaterial(mat, 0);
-        this._updateBlendFunc();
     }
 }
