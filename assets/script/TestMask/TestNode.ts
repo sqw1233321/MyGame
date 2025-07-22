@@ -1,9 +1,9 @@
-import { _decorator, Component, Node, UITransform, Vec2, Vec3 } from 'cc';
-import { TextureClip } from './TextureClip';
-import { NodeUtil } from '../NodeUtil';
+import { _decorator, Component, Node, UITransform, Vec2, Vec3 } from "cc";
+import { TextureClip } from "./TextureClip";
+import { NodeUtil } from "../NodeUtil";
 const { ccclass, property } = _decorator;
 
-@ccclass('TestNode')
+@ccclass("TestNode")
 export class TestNode extends Component {
     @property(TextureClip)
     textureClip: TextureClip;
@@ -18,7 +18,7 @@ export class TestNode extends Component {
         console.log("pixels  is  ", pixels);
         const posArr: Vec3[] = [];
         const showSpUI = showSp.node.getComponent(UITransform);
-        pixels.forEach(pixelPos => {
+        pixels.forEach((pixelPos) => {
             const rateX = pixelPos.x / nodeSize.width;
             const rateY = pixelPos.y / nodeSize.height;
             //距离spriteFrame左上角的位置
@@ -36,14 +36,10 @@ export class TestNode extends Component {
             //相对于父节点的位置
             const realPos = this.parentNd.getComponent(UITransform)?.convertToNodeSpaceAR(worldPos);
             posArr.push(realPos);
-        })
+        });
 
         NodeUtil.autoRefreshChildren(this.parentNd, posArr, (item, index, pos) => {
             item.setPosition(pos);
-        })
-
+        });
     }
-
 }
-
-

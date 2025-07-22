@@ -3,14 +3,11 @@
     创建人: yjy
     创建时间: 2021.9.23
 */
-export interface AllEvent {
-
-}
-
+export interface AllEvent {}
 
 export default class CustomEventTarget {
-    private static s_targetInfos: { target: Object, eventTargets: CustomEventTarget[] }[] = [];
-    private _events: { [index: string]: { callback: Function, target: Object, priority: number, isOnce: boolean }[] };
+    private static s_targetInfos: { target: Object; eventTargets: CustomEventTarget[] }[] = [];
+    private _events: { [index: string]: { callback: Function; target: Object; priority: number; isOnce: boolean }[] };
 
     /**
      * 查找目标信息
@@ -60,7 +57,7 @@ export default class CustomEventTarget {
             return;
         }
         let index = targetInfo.eventTargets.indexOf(eventTarget);
-        if (index > - 1) {
+        if (index > -1) {
             targetInfo.eventTargets.splice(index, 1);
             if (targetInfo.eventTargets.length < 1) {
                 CustomEventTarget.removeTargetInfo(target);
@@ -276,10 +273,10 @@ export default class CustomEventTarget {
 
     /**
      * 类型安全监听一次
-     * @param eventName 
-     * @param callback 
-     * @param target 
-     * @param priority 
+     * @param eventName
+     * @param callback
+     * @param target
+     * @param priority
      */
     public onceSafe<T extends keyof AllEvent>(eventName: T, callback: (value: AllEvent[T]) => void, target: Object, priority: number = 0) {
         this.on(eventName, callback, target, priority, true);
@@ -287,20 +284,20 @@ export default class CustomEventTarget {
 
     /**
      * 类型安全监听
-     * @param eventName 
-     * @param callback 
-     * @param target 
-     * @param priority 
-     * @param isOnce 
+     * @param eventName
+     * @param callback
+     * @param target
+     * @param priority
+     * @param isOnce
      */
     public onSafe<T extends keyof AllEvent>(eventName: T, callback: (value: AllEvent[T]) => void, target: Object, priority: number = 0, isOnce: boolean = false) {
-        this.on(eventName, callback, target, priority, isOnce)
+        this.on(eventName, callback, target, priority, isOnce);
     }
 
     /**
      * 类型安全发送事件
-     * @param eventName 
-     * @param value 
+     * @param eventName
+     * @param value
      */
     public emitSafe<T extends keyof AllEvent>(eventName: T, value?: AllEvent[T]) {
         this.emit(eventName, value);
@@ -308,9 +305,9 @@ export default class CustomEventTarget {
 
     /**
      * 类型安全取消事件
-     * @param eventName 
-     * @param callback 
-     * @param target 
+     * @param eventName
+     * @param callback
+     * @param target
      */
     public offSafe<T extends keyof AllEvent>(eventName: T, callback: (value: AllEvent[T]) => void, target: Object) {
         this.off(eventName, callback, target);
@@ -318,10 +315,10 @@ export default class CustomEventTarget {
 
     /**
      * 类型安全多个事件监听
-     * @param eventNames 
-     * @param callback 
-     * @param target 
-     * @param priority 
+     * @param eventNames
+     * @param callback
+     * @param target
+     * @param priority
      */
     public onMutilSafe<T extends keyof AllEvent>(eventNames: T[], callback: (value: AllEvent[T]) => void, target: Object, priority: number = 0) {
         for (let i = 0; i < eventNames.length; i++) {

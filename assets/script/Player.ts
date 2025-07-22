@@ -1,11 +1,11 @@
-import { _decorator, Component, EventKeyboard, input, Input, KeyCode, Node, Vec3 } from 'cc';
-import { CreatureObject } from './CreatureObject';
-import { GameEvent, GlobalEventTarget } from './event/GlobalEventTarget';
-import { MapUtil } from './MapUtil';
-import { Coordinate } from './GameObject';
+import { _decorator, Component, EventKeyboard, input, Input, KeyCode, Node, Vec3 } from "cc";
+import { CreatureObject } from "./CreatureObject";
+import { GameEvent, GlobalEventTarget } from "./event/GlobalEventTarget";
+import { MapUtil } from "./MapUtil";
+import { Coordinate } from "./GameObject";
 const { ccclass, property } = _decorator;
 
-@ccclass('Player')
+@ccclass("Player")
 export class Player extends CreatureObject {
     private keyMap: { [key: number]: boolean } = {};
 
@@ -41,7 +41,7 @@ export class Player extends CreatureObject {
         const canGo = MapUtil.getCanGoByCoordinate(newCord);
         console.log(`nowCord: {x:${nowCord.x} y:${nowCord.y}}  newCord: {x:${newCord.x} y:${newCord.y}}`);
         if (!canGo) {
-            console.log("不能走")
+            console.log("不能走");
             return;
         }
         const localPos = MapUtil.cordInvetLocalPosVec(this.node.parent, newCord);
@@ -49,5 +49,3 @@ export class Player extends CreatureObject {
         GlobalEventTarget.emit(GameEvent.AStarStart, newCord);
     }
 }
-
-

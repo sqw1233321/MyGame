@@ -1,5 +1,5 @@
-import { _decorator, Component, Node } from 'cc';
-import { Coordinate } from './GameObject';
+import { _decorator, Component, Node } from "cc";
+import { Coordinate } from "./GameObject";
 const { ccclass, property } = _decorator;
 
 export enum MapObjectType {
@@ -7,7 +7,7 @@ export enum MapObjectType {
     WALL,
 }
 
-@ccclass('GameMap')
+@ccclass("GameMap")
 export class GameMap {
     private _mapDat = [
         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -44,16 +44,14 @@ export class GameMap {
         [1, -1, 2, 2, 2, 2, 2, -1, 3, 3, 3, 3, 3, 3, -1, 3],
         [1, -1, -1, -1, -1, -1, 2, -1, -1, -1, -1, -1, -1, -1, -1, 3],
         [1, 3, 3, 3, 3, -1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
-        [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+        [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
     ];
 
     private _mapDat1D = null;
 
     private _mapDatOri1D = null;
 
-    constructor() {
-
-    }
+    constructor() {}
 
     public getMapDat2D() {
         return this._mapDat;
@@ -85,12 +83,7 @@ export class GameMap {
         return this._mapDatOri1D;
     }
 
-
-
     public getSize() {
         return this._mapDat.length;
     }
-
 }
-
-

@@ -1,13 +1,12 @@
-import { _decorator, Component, EventTouch, Graphics, Mat4, Node, Vec2, Vec3 } from 'cc';
-import ToolsSplit from './ToolsSplit';
-import { SplitRender } from './SplitRender';
-import * as SplitHelper from "./helper"
-import { splitNd } from './splitNd';
+import { _decorator, Component, EventTouch, Graphics, Mat4, Node, Vec2, Vec3 } from "cc";
+import ToolsSplit from "./ToolsSplit";
+import { SplitRender } from "./SplitRender";
+import * as SplitHelper from "./helper";
+import { splitNd } from "./splitNd";
 const { ccclass, property } = _decorator;
 
-@ccclass('SplitTextureInput')
+@ccclass("SplitTextureInput")
 export class SplitTextureInput extends Component {
-
     @property(Node)
     lineTool: Node = null;
 
@@ -23,7 +22,6 @@ export class SplitTextureInput extends Component {
 
     private startPoint: Vec2 = null;
     private endPoint: Vec2 = null;
-
 
     protected onLoad(): void {
         this._graphics = this.lineTool.getComponent(Graphics);
@@ -44,8 +42,7 @@ export class SplitTextureInput extends Component {
         console.log("   selectSlice  is ", isSelectSlice);
         this._graphics.enabled = !isSelectSlice;
         if (this._isSelectSlice) {
-        }
-        else {
+        } else {
             this.startPoint = e.getUILocation();
         }
     }
@@ -58,8 +55,7 @@ export class SplitTextureInput extends Component {
             worldPos.x += offset.x;
             worldPos.y += offset.y;
             sliceNd.setWorldPosition(new Vec3(worldPos.x, worldPos.y, 0));
-        }
-        else {
+        } else {
             this._graphics.clear();
             this._graphics.moveTo(this.startPoint.x, this.startPoint.y);
             let p = e.getUILocation();
@@ -70,9 +66,7 @@ export class SplitTextureInput extends Component {
 
     onTouchEnd(e: EventTouch) {
         if (this._isSelectSlice) {
-
-        }
-        else {
+        } else {
             this._graphics.clear();
             this.endPoint = e.getUILocation();
             this._splitTool.useLineCutPolygon(this.startPoint, this.endPoint);
@@ -94,8 +88,7 @@ export class SplitTextureInput extends Component {
                 let localMat = new Mat4();
                 Mat4.invert(localMat, worldMat);
                 Vec3.transformMat4(point, new Vec3(pos.x, pos.y, 0), localMat);
-            }
-            else {
+            } else {
                 point.x = pos.x;
                 point.y = pos.y;
                 point.z = 0;
@@ -109,7 +102,4 @@ export class SplitTextureInput extends Component {
         }
         return [res, nd];
     }
-
 }
-
-

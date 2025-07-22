@@ -1,8 +1,7 @@
-
 import { math, v2, Vec2 } from "cc";
 
-function ab_cross_ac(a, b, c) //ab与ac的叉积
-{
+function ab_cross_ac(a, b, c) {
+    //ab与ac的叉积
     return cross(b.x - a.x, b.y - a.y, c.x - a.x, c.y - a.y);
 }
 function dot(x1, y1, x2, y2) {
@@ -40,9 +39,8 @@ export function isInTriangle(point: Vec2, triA: Vec2, triB: Vec2, triC: Vec2) {
     Vec2.subtract(BD, point, triB);
 
     //@ts-ignore
-    return (AB.cross(AC) >= 0 ^ AB.cross(AD) < 0) && (AB.cross(AC) >= 0 ^ AC.cross(AD) >= 0) && (BC.cross(AB) > 0 ^ BC.cross(BD) >= 0);
+    return (AB.cross(AC) >= 0) ^ (AB.cross(AD) < 0) && (AB.cross(AC) >= 0) ^ (AC.cross(AD) >= 0) && (BC.cross(AB) > 0) ^ (BC.cross(BD) >= 0);
 }
-
 
 export function isInPolygon(checkPoint: Vec2, polygonPoints: Vec2[]) {
     var counter = 0;
@@ -54,13 +52,10 @@ export function isInPolygon(checkPoint: Vec2, polygonPoints: Vec2[]) {
 
     for (i = 1; i <= pointCount; i++) {
         p2 = polygonPoints[i % pointCount];
-        if (
-            checkPoint.x > Math.min(p1.x, p2.x) &&
-            checkPoint.x <= Math.max(p1.x, p2.x)
-        ) {
+        if (checkPoint.x > Math.min(p1.x, p2.x) && checkPoint.x <= Math.max(p1.x, p2.x)) {
             if (checkPoint.y <= Math.max(p1.y, p2.y)) {
                 if (p1.x != p2.x) {
-                    xinters = (checkPoint.x - p1.x) * (p2.y - p1.y) / (p2.x - p1.x) + p1.y;
+                    xinters = ((checkPoint.x - p1.x) * (p2.y - p1.y)) / (p2.x - p1.x) + p1.y;
                     if (p1.y == p2.y || checkPoint.y <= xinters) {
                         counter++;
                     }
@@ -102,7 +97,7 @@ export function computeUv(points: Vec2[], width: number, height: number) {
     for (const p of points) {
         // uv原点是左上角
         let x = math.clamp(0, 1, (p.x + width / 2) / width);
-        let y = math.clamp(0, 1, 1. - (p.y + height / 2) / height);
+        let y = math.clamp(0, 1, 1 - (p.y + height / 2) / height);
         uvs.push(v2(x, y));
     }
     return uvs;
@@ -110,22 +105,22 @@ export function computeUv(points: Vec2[], width: number, height: number) {
 
 export function splitPolygon(points: Vec2[]): number[] {
     if (points.length <= 3) return [0, 1, 2];
-    let pointMap: { [key: string]: number } = {};     // point与idx的映射
+    let pointMap: { [key: string]: number } = {}; // point与idx的映射
     for (let i = 0; i < points.length; i++) {
         let p = points[i];
         pointMap[`${p.x}-${p.y}`] = i;
     }
     const getIdx = (p: Vec2) => {
-        return pointMap[`${p.x}-${p.y}`]
-    }
+        return pointMap[`${p.x}-${p.y}`];
+    };
     points = points.concat([]);
     let idxs: number[] = [];
 
     let index = 0;
     while (points.length > 3) {
-        let p1 = points[(index) % points.length]
-            , p2 = points[(index + 1) % points.length]
-            , p3 = points[(index + 2) % points.length];
+        let p1 = points[index % points.length],
+            p2 = points[(index + 1) % points.length],
+            p3 = points[(index + 2) % points.length];
         let splitPoint = (index + 1) % points.length;
 
         let v1: Vec2 = new Vec2();
@@ -133,7 +128,8 @@ export function splitPolygon(points: Vec2[]): number[] {
         let v2: Vec2 = new Vec2();
         Vec2.subtract(v2, p3, p2);
 
-        if (v1.cross(v2) < 0) {      // 是一个凹角, 寻找下一个
+        if (v1.cross(v2) < 0) {
+            // 是一个凹角, 寻找下一个
             index = (index + 1) % points.length;
             continue;
         }
@@ -144,7 +140,8 @@ export function splitPolygon(points: Vec2[]): number[] {
                 break;
             }
         }
-        if (hasPoint) {      // 当前三角形包含其他点, 寻找下一个
+        if (hasPoint) {
+            // 当前三角形包含其他点, 寻找下一个
             index = (index + 1) % points.length;
             continue;
         }
@@ -161,18 +158,18 @@ export function splitPolygon(points: Vec2[]): number[] {
 //点发出的右射线和线段的关系
 // 返回值: -1:不相交, 0:相交, 1:点在线段上
 function rayPointToLine(point: Vec2, linePA: Vec2, linePB: Vec2) {
-    // 定义最小和最大的X Y轴值  
+    // 定义最小和最大的X Y轴值
     let minX = Math.min(linePA.x, linePB.x);
     let maxX = Math.max(linePA.x, linePB.x);
     let minY = Math.min(linePA.y, linePB.y);
     let maxY = Math.max(linePA.y, linePB.y);
 
-    // 射线与边无交点的其他情况  
+    // 射线与边无交点的其他情况
     if (point.y < minY || point.y > maxY || point.x > maxX) {
         return -1;
     }
 
-    // 剩下的情况, 计算射线与边所在的直线的交点的横坐标  
+    // 剩下的情况, 计算射线与边所在的直线的交点的横坐标
     let x0 = linePA.x + ((linePB.x - linePA.x) / (linePB.y - linePA.y)) * (point.y - linePA.y);
     if (x0 > point.x) {
         return 0;
@@ -215,15 +212,18 @@ function relationPointToPolygon(point: Vec2, polygon: Vec2[]) {
 //求两条线段的交点
 //返回值：[n,p] n:0相交，1在共有点，-1不相交  p:交点
 function lineCrossPoint(p1: Vec2, p2: Vec2, q1: Vec2, q2: Vec2): [number, Vec2] {
-    let a = p1, b = p2, c = q1, d = q2;
+    let a = p1,
+        b = p2,
+        c = q1,
+        d = q2;
     let s1, s2, s3, s4;
     let d1, d2, d3, d4;
     let p: Vec2 = new Vec2(0, 0);
 
-    d1 = dblcmp(s1 = ab_cross_ac(a, b, c), 0);
-    d2 = dblcmp(s2 = ab_cross_ac(a, b, d), 0);
-    d3 = dblcmp(s3 = ab_cross_ac(c, d, a), 0);
-    d4 = dblcmp(s4 = ab_cross_ac(c, d, b), 0);
+    d1 = dblcmp((s1 = ab_cross_ac(a, b, c)), 0);
+    d2 = dblcmp((s2 = ab_cross_ac(a, b, d)), 0);
+    d3 = dblcmp((s3 = ab_cross_ac(c, d, a)), 0);
+    d4 = dblcmp((s4 = ab_cross_ac(c, d, b)), 0);
 
     //如果规范相交则求交点
     if ((d1 ^ d2) == -2 && (d3 ^ d4) == -2) {
@@ -274,12 +274,10 @@ export function lineCutPolygon(pa: Vec2, pb: Vec2, polygon: Vec2[]) {
         if (c[0] == 0) {
             pointIndex.push(points.length);
             points.push(c[1] as Vec2);
-        }
-        else if (c[0] > 0) {
+        } else if (c[0] > 0) {
             if ((c[1] as Vec2).equals(a)) {
                 pointIndex.push(points.length - 1);
-            }
-            else {
+            } else {
                 pointIndex.push(points.length);
             }
         }
@@ -293,10 +291,10 @@ export function lineCutPolygon(pa: Vec2, pb: Vec2, polygon: Vec2[]) {
         let inPolygon: boolean = r >= 0;
 
         let cp0_cp1: Vec2 = new Vec2();
-        let len_0_1 = Vec2.subtract(cp0_cp1, cp0, cp1).length()
+        let len_0_1 = Vec2.subtract(cp0_cp1, cp0, cp1).length();
 
         let cp0_cp: Vec2 = new Vec2();
-        let len_0_ = Vec2.subtract(cp0_cp, cp0, points[pointIndex[pointIndex.length - 1]]).length()
+        let len_0_ = Vec2.subtract(cp0_cp, cp0, points[pointIndex[pointIndex.length - 1]]).length();
 
         if (pointIndex.length > 2 && len_0_1 > len_0_) {
             cp1 = points[pointIndex[pointIndex.length - 1]];
@@ -304,7 +302,7 @@ export function lineCutPolygon(pa: Vec2, pb: Vec2, polygon: Vec2[]) {
             inPolygon = r < 0;
         }
 
-        let firstInPolygon = inPolygon;//起始点是从外面穿到里面
+        let firstInPolygon = inPolygon; //起始点是从外面穿到里面
 
         let index = 0;
         let startIndex = pointIndex[index];
@@ -334,21 +332,18 @@ export function lineCutPolygon(pa: Vec2, pb: Vec2, polygon: Vec2[]) {
                     newPoints.push(p);
                     ret.push(newPoints);
                     newPoints = [];
-                }
-                else {
+                } else {
                     //开始新的多边形
                     newPoints = [];
                     newPoints.push(p);
                 }
                 oldPoints.push(p);
                 inPolygon = !inPolygon;
-            }
-            else {
+            } else {
                 //普通的点
                 if (inPolygon) {
                     newPoints.push(p);
-                }
-                else {
+                } else {
                     oldPoints.push(p);
                 }
             }
@@ -360,15 +355,13 @@ export function lineCutPolygon(pa: Vec2, pb: Vec2, polygon: Vec2[]) {
                 //如果起始点是从里面穿出去，到这里跟起始点形成闭包
                 newPoints.push(points[pointIndex[0]]);
                 ret.push(newPoints);
-            }
-            else {
+            } else {
                 //结束了，但是现在的状态是穿在多边形内部
                 //把newPoints里面的回复到主多边形中
                 for (let i = 0; i < newPoints.length; ++i) {
                     oldPoints.push(newPoints[i]);
                 }
             }
-
         }
 
         ret.push(oldPoints);

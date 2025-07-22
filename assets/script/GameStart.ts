@@ -1,20 +1,20 @@
-import { _decorator, Component, Node, js, Layout, dynamicAtlasManager, instantiate, director, game, Game, Camera } from 'cc';
-import { NodeUtil } from './NodeUtil';
-import { GameMap, MapObjectType } from './GameMap';
-import { AStar } from './AStar';
-import { Coordinate } from './GameObject';
-import { MapObject, MapObjectOrientation } from './MapObject'
-import { GameEvent, GlobalEventTarget } from './event/GlobalEventTarget';
-import { MapUtil } from './MapUtil';
-import { Enemy } from './Enemy';
-import { Player } from './Player';
-import { SettingLayer } from './SettingLayer';
-import { GameMgr, GameMode } from './GameMgr';
-import { CameraController } from './CameraController';
-import { CameraFollwer } from './CameraFollwer';
+import { _decorator, Component, Node, js, Layout, dynamicAtlasManager, instantiate, director, game, Game, Camera } from "cc";
+import { NodeUtil } from "./NodeUtil";
+import { GameMap, MapObjectType } from "./GameMap";
+import { AStar } from "./AStar";
+import { Coordinate } from "./GameObject";
+import { MapObject, MapObjectOrientation } from "./MapObject";
+import { GameEvent, GlobalEventTarget } from "./event/GlobalEventTarget";
+import { MapUtil } from "./MapUtil";
+import { Enemy } from "./Enemy";
+import { Player } from "./Player";
+import { SettingLayer } from "./SettingLayer";
+import { GameMgr, GameMode } from "./GameMgr";
+import { CameraController } from "./CameraController";
+import { CameraFollwer } from "./CameraFollwer";
 const { ccclass, property } = _decorator;
 
-@ccclass('GameStart')
+@ccclass("GameStart")
 export class GameStart extends Component {
     @property(Node)
     mapSc: Node;
@@ -65,8 +65,8 @@ export class GameStart extends Component {
         new MapUtil(this.mapSc, this._map);
         this.createCreature();
         const mode = GameMgr.Instance.getGameMode();
-        this.camController.enabled = (mode == GameMode.EDITOR);
-        this.cameraFollwer.enabled = (mode == GameMode.PLAY);
+        this.camController.enabled = mode == GameMode.EDITOR;
+        this.cameraFollwer.enabled = mode == GameMode.PLAY;
         this.setLayer.changeModeLb(mode);
     }
 
@@ -84,9 +84,8 @@ export class GameStart extends Component {
         else if (gameMode == GameMode.EDITOR) newMode = GameMode.PLAY;
         GameMgr.Instance.setGameMode(newMode);
         this.setLayer.changeModeLb(newMode);
-        director.loadScene('AStar');
+        director.loadScene("AStar");
     }
-
 
     private createMap() {
         this._map = new GameMap();
@@ -102,13 +101,12 @@ export class GameStart extends Component {
                 index: index,
                 coordinate: {
                     x: index % this._size,
-                    y: Math.floor(index / this._size)
+                    y: Math.floor(index / this._size),
                 },
                 objectType: dat as MapObjectType,
-                orientation: mapDirs[index] as MapObjectOrientation
-            })
+                orientation: mapDirs[index] as MapObjectOrientation,
+            });
         });
-
     }
 
     private createFront() {
@@ -124,13 +122,13 @@ export class GameStart extends Component {
                 index: index,
                 coordinate: {
                     x: index % this._size,
-                    y: Math.floor(index / this._size)
+                    y: Math.floor(index / this._size),
                 },
                 objectType: mapDats[index] as MapObjectType,
-                orientation: mapDirs[index] as MapObjectOrientation
-            })
+                orientation: mapDirs[index] as MapObjectOrientation,
+            });
             if (item.getComponent(MapObject).getType() == MapObjectType.ROAD) item.children[0].active = false;
-        })
+        });
     }
 
     private createCreature() {
@@ -161,13 +159,8 @@ export class GameStart extends Component {
         return this._map;
     }
 
-
     protected onDestroy(): void {
         GlobalEventTarget.off(GameEvent.AStarStart, this.AStarStart, this);
         GlobalEventTarget.off(GameEvent.GameModeChange, this.changeGameMode, this);
     }
-
-
 }
-
-

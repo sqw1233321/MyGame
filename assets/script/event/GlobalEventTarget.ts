@@ -5,4 +5,4 @@ export enum GameEvent {
     GameModeChange = "GameModeChange",
 }
 
-export const GlobalEventTarget = new CustomEventTarget()
+export const GlobalEventTarget = new CustomEventTarget();

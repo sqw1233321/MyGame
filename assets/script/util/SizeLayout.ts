@@ -45,7 +45,7 @@ export class SizeLayout extends Component {
     }
 
     public updateLayout() {
-        const hasActArr = this.node.children.filter(child => child.active)
+        const hasActArr = this.node.children.filter((child) => child.active);
         const hasAct = hasActArr.length > 0;
         this._layout && (this._layout.enabled = hasAct);
         if (hasAct) {
@@ -69,13 +69,11 @@ export class SizeLayout extends Component {
                     const left = delayLeft / parentAnchor.x;
                     const right = delayRight / parentAnchor.y;
                     nowWidth = Math.max(left, right);
-                }
-                else if (parentPos.x > childRightborder) {
+                } else if (parentPos.x > childRightborder) {
                     const delayLeft = parentPos.x - childLeftborder;
                     const left = delayLeft / parentAnchor.x;
                     nowWidth = left;
-                }
-                else {
+                } else {
                     const delayRight = childRightborder - parentPos.x;
                     const right = delayRight / (1 - parentAnchor.x);
                     nowWidth = right;
@@ -87,13 +85,11 @@ export class SizeLayout extends Component {
                     const bottom = delayBottom / parentAnchor.y;
                     const up = delayUp / (1 - parentAnchor.y);
                     nowHeight = Math.max(bottom, up);
-                }
-                else if (parentPos.y > childUpborder) {
+                } else if (parentPos.y > childUpborder) {
                     const delayBottom = parentPos.y - childBottomborder;
                     const bottom = delayBottom / parentAnchor.y;
                     nowHeight = bottom;
-                }
-                else {
+                } else {
                     const delayUp = childUpborder - parentPos.y;
                     const up = delayUp / (1 - parentAnchor.y);
                     nowHeight = up;
@@ -104,8 +100,7 @@ export class SizeLayout extends Component {
             });
             if (this.policy == Type.HORIZONTAL) this.node._uiProps.uiTransformComp!.width = maxWidth;
             if (this.policy == Type.VERTICAL) this.node._uiProps.uiTransformComp!.height = maxHeight;
-        }
-        else {
+        } else {
             if (this.policy == Type.HORIZONTAL) this.node._uiProps.uiTransformComp!.width = 0;
             if (this.policy == Type.VERTICAL) this.node._uiProps.uiTransformComp!.height = 0;
         }

@@ -1,8 +1,7 @@
-import { __private, _decorator, Component, IAssembler, Node, Renderable2D, SpriteFrame } from 'cc';
+import { __private, _decorator, Component, IAssembler, Node, Renderable2D, SpriteFrame } from "cc";
 const { ccclass, property } = _decorator;
 
 export class myAssembler implements IAssembler {
-
     createData(renderComp: MyRenderer) {
         const renderData = renderComp.requestRenderData();
         renderData.dataLength = 2;
@@ -30,14 +29,19 @@ export class myAssembler implements IAssembler {
         const data0 = dataList[0];
         const data3 = dataList[1];
         const matrix = node.worldMatrix;
-        const a = matrix.m00; const b = matrix.m01;
-        const c = matrix.m04; const d = matrix.m05;
+        const a = matrix.m00;
+        const b = matrix.m01;
+        const c = matrix.m04;
+        const d = matrix.m05;
 
         const justTranslate = a === 1 && b === 0 && c === 0 && d === 1;
 
-        const tx = matrix.m12; const ty = matrix.m13;
-        const vl = data0.x; const vr = data3.x;
-        const vb = data0.y; const vt = data3.y;
+        const tx = matrix.m12;
+        const ty = matrix.m13;
+        const vl = data0.x;
+        const vr = data3.x;
+        const vb = data0.y;
+        const vt = data3.y;
 
         if (justTranslate) {
             const vltx = vl + tx;
@@ -58,10 +62,14 @@ export class myAssembler implements IAssembler {
             vData[27] = vrtx;
             vData[28] = vtty;
         } else {
-            const al = a * vl; const ar = a * vr;
-            const bl = b * vl; const br = b * vr;
-            const cb = c * vb; const ct = c * vt;
-            const db = d * vb; const dt = d * vt;
+            const al = a * vl;
+            const ar = a * vr;
+            const bl = b * vl;
+            const br = b * vr;
+            const cb = c * vb;
+            const ct = c * vt;
+            const db = d * vb;
+            const dt = d * vt;
 
             const cbtx = cb + tx;
             const cttx = ct + tx;
@@ -158,7 +166,6 @@ export class myAssembler implements IAssembler {
         renderData.vertDirty = true;
     }
 
-
     updateUVs(renderComp: MyRenderer) {
         if (!renderComp.spriteFrame?.uv) return;
         const renderData = renderComp.renderData!;
@@ -190,11 +197,9 @@ export class myAssembler implements IAssembler {
             vData[colorOffset + 3] = colorA;
         }
     }
-
-
 }
 
-@ccclass('MyRenderer')
+@ccclass("MyRenderer")
 export class MyRenderer extends Renderable2D {
     @property({ type: SpriteFrame, serializable: true })
     protected _spriteFrame: SpriteFrame | null = null;
@@ -212,7 +217,10 @@ export class MyRenderer extends Renderable2D {
         const lastSprite = this._spriteFrame;
         this._spriteFrame = value;
 
-        let l = -value.width / 2, b = -value.height / 2, t = value.height / 2, r = value.width / 2;
+        let l = -value.width / 2,
+            b = -value.height / 2,
+            t = value.height / 2,
+            r = value.width / 2;
         //this.polygon = [v2(l, b), v2(r, b), v2(r, t), v2(l, t)];
 
         this.markForUpdateRenderData(false);
@@ -268,10 +276,9 @@ export class MyRenderer extends Renderable2D {
     //     }
     // }
 
-    private _updateUVs(){
+    private _updateUVs() {
         this._assembler.updateUvs();
     }
-
 
     protected _flushAssembler(): void {
         if (this._assembler == null) {
@@ -292,7 +299,4 @@ export class MyRenderer extends Renderable2D {
     protected _render(render: __private._cocos_2d_renderer_i_batcher__IBatcher): void {
         this._assembler.fillBuffers(this, render);
     }
-
 }
-
-

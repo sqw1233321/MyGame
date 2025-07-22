@@ -1,7 +1,7 @@
-import { _decorator, Component, Node, Rect, Sprite, SpriteFrame, Vec3 } from 'cc';
+import { _decorator, Component, Node, Rect, Sprite, SpriteFrame, Vec3 } from "cc";
 const { ccclass, property } = _decorator;
 
-@ccclass('SpritePacks')
+@ccclass("SpritePacks")
 export class SpritePacks extends Component {
     //列
     @property
@@ -35,7 +35,6 @@ export class SpritePacks extends Component {
         this._initCb?.();
     }
 
-
     private createSubSpriteFrame(): SpriteFrame[] {
         const bigSprite = this.getComponent(Sprite)?.spriteFrame;
         if (!bigSprite) return;
@@ -46,7 +45,6 @@ export class SpritePacks extends Component {
 
         const tileWidth = width / this.col;
         const tileHeight = height / this.row;
-
 
         const res: SpriteFrame[] = [];
 
@@ -75,7 +73,7 @@ export class SpritePacks extends Component {
             spriteNode.layer = this.node.layer;
             spriteNode.setPosition(new Vec3(0, this.distance * i * this.scale, 0));
             spriteNode.setScale(this.scale, this.scale, 1);
-            spriteNode.setRotationFromEuler(0, 0, this.node.eulerAngles.z);  // 模拟 image_angle
+            spriteNode.setRotationFromEuler(0, 0, this.node.eulerAngles.z); // 模拟 image_angle
             const sprite = spriteNode.addComponent(Sprite);
             sprite.spriteFrame = sp;
             this.node.addChild(spriteNode);
@@ -89,9 +87,6 @@ export class SpritePacks extends Component {
             const speed = 90; // 每秒旋转角度（度）
             const currentRotation = nd.eulerAngles.z;
             nd.setRotationFromEuler(0, 0, currentRotation + speed * dt);
-        })
+        });
     }
-
 }
-
-

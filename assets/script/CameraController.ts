@@ -1,8 +1,25 @@
-import { __private, _decorator, Camera, Component, EPhysics2DDrawFlags, ERaycast2DType, EventMouse, EventTouch, input, Input, Node, NodeEventType, PhysicsSystem, PhysicsSystem2D, Vec2, Vec3 } from 'cc';
-import { GameMgr, GameMode } from './GameMgr';
+import {
+    __private,
+    _decorator,
+    Camera,
+    Component,
+    EPhysics2DDrawFlags,
+    ERaycast2DType,
+    EventMouse,
+    EventTouch,
+    input,
+    Input,
+    Node,
+    NodeEventType,
+    PhysicsSystem,
+    PhysicsSystem2D,
+    Vec2,
+    Vec3,
+} from "cc";
+import { GameMgr, GameMode } from "./GameMgr";
 const { ccclass, property } = _decorator;
 
-@ccclass('CameraController')
+@ccclass("CameraController")
 export class CameraController extends Component {
     private isDragging = false;
     private lastPos = new Vec3();
@@ -43,7 +60,6 @@ export class CameraController extends Component {
         this.touch(event);
     }
 
-
     private touch(event: EventMouse) {
         const mode = GameMgr.Instance.getGameMode();
         if (mode == GameMode.PLAY) return;
@@ -80,5 +96,3 @@ export class CameraController extends Component {
     //     input.off(Input.EventType.TOUCH_CANCEL, this.onTouchUp, this);
     // }
 }
-
-

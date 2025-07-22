@@ -1,11 +1,10 @@
-import { _decorator, Component, EventTouch, Mat4, Node, Rect, Size, Sprite, UI, UITransform, Vec2, Vec3, Vec4 } from 'cc';
-import * as SplitHelper from "./helper"
-import { SplitRender } from './SplitRender';
+import { _decorator, Component, EventTouch, Mat4, Node, Rect, Size, Sprite, UI, UITransform, Vec2, Vec3, Vec4 } from "cc";
+import * as SplitHelper from "./helper";
+import { SplitRender } from "./SplitRender";
 const { ccclass, property } = _decorator;
 
-@ccclass('splitNd')
+@ccclass("splitNd")
 export class splitNd extends Component {
-
     private _offset: Vec3;
 
     protected onLoad(): void {
@@ -14,7 +13,7 @@ export class splitNd extends Component {
 
     refreshOffset() {
         const renderComp = this.node.getComponent(SplitRender);
-        const polygon = renderComp.polygon;;
+        const polygon = renderComp.polygon;
         const anchor = this.node.getComponent(UITransform).anchorPoint;
         const point = this.getPolygonCentroid(polygon);
         this._offset = new Vec3(anchor.x - point.x, anchor.y - point.y, 0);
@@ -26,7 +25,8 @@ export class splitNd extends Component {
 
     getPolygonCentroid(polygon: Vec2[]): Vec2 {
         let area = 0;
-        let cx = 0, cy = 0;
+        let cx = 0,
+            cy = 0;
 
         const len = polygon.length;
         for (let i = 0; i < len; i++) {
@@ -43,7 +43,4 @@ export class splitNd extends Component {
         const factor = 1 / (6 * area);
         return new Vec2(cx * factor, cy * factor);
     }
-
 }
-
-

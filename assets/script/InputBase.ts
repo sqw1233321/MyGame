@@ -1,7 +1,7 @@
-import { _decorator, Component, EventTouch, Node } from 'cc';
+import { _decorator, Component, EventTouch, Node } from "cc";
 const { ccclass, property } = _decorator;
 
-@ccclass('InputBase')
+@ccclass("InputBase")
 export class InputBase extends Component {
     start() {
         this.node.on(Node.EventType.TOUCH_START, this.onTouchStart, this);
@@ -10,18 +10,9 @@ export class InputBase extends Component {
         this.node.on(Node.EventType.TOUCH_CANCEL, this.onTouchEnd, this);
     }
 
-    onTouchStart(e: EventTouch) {
-      
-    }
+    onTouchStart(e: EventTouch) {}
 
-    onTouchMove(e: EventTouch) {
-       
-    }
+    onTouchMove(e: EventTouch) {}
 
-    onTouchEnd(e: EventTouch) {
-    
-    }
-
+    onTouchEnd(e: EventTouch) {}
 }
-
-

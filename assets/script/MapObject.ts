@@ -1,27 +1,26 @@
-import { _decorator, Color, Component, EventMouse, Input, input, Label, Node, NodeEventType, resources, Sprite, SpriteFrame, Texture2D } from 'cc';
-import { MapObjectType as MapObjectType } from './GameMap';
-import { Coordinate, GameObject } from './GameObject';
-import { GameEvent, GlobalEventTarget } from './event/GlobalEventTarget';
-import { SpritePacks } from './SpritePacks';
+import { _decorator, Color, Component, EventMouse, Input, input, Label, Node, NodeEventType, resources, Sprite, SpriteFrame, Texture2D } from "cc";
+import { MapObjectType as MapObjectType } from "./GameMap";
+import { Coordinate, GameObject } from "./GameObject";
+import { GameEvent, GlobalEventTarget } from "./event/GlobalEventTarget";
+import { SpritePacks } from "./SpritePacks";
 const { ccclass, property } = _decorator;
 
 export interface MapObjectDat {
-    index: number,
-    coordinate: Coordinate,
-    objectType: MapObjectType,
-    orientation: MapObjectOrientation
+    index: number;
+    coordinate: Coordinate;
+    objectType: MapObjectType;
+    orientation: MapObjectOrientation;
 }
 
 export enum MapObjectOrientation {
     UP = 1,
     DOWN = 2,
     LEFT = 3,
-    RIGHT = 4
+    RIGHT = 4,
 }
 
-@ccclass('MapObject')
+@ccclass("MapObject")
 export class MapObject extends GameObject {
-
     @property(Sprite)
     objectSp: Sprite;
 
@@ -35,7 +34,7 @@ export class MapObject extends GameObject {
     wallTexture: Texture2D;
 
     private _index: number;
-    private _objectType: MapObjectType
+    private _objectType: MapObjectType;
     private _dir: MapObjectOrientation;
 
     protected onLoad(): void {
@@ -76,18 +75,18 @@ export class MapObject extends GameObject {
                 z = 0;
                 break;
             case MapObjectOrientation.DOWN:
-                z = 180
+                z = 180;
                 break;
             case MapObjectOrientation.LEFT:
-                z = 90
+                z = 90;
                 break;
             case MapObjectOrientation.RIGHT:
-                z = -90
+                z = -90;
                 break;
         }
-        this.objectSp.node.children.forEach(item => {
+        this.objectSp.node.children.forEach((item) => {
             item.setRotationFromEuler(0, 0, z);
-        })
+        });
     }
 
     public getType() {
@@ -100,7 +99,4 @@ export class MapObject extends GameObject {
             GlobalEventTarget.emit(GameEvent.AStarStart, this.getCoordinate());
         }
     }
-
 }
-
-

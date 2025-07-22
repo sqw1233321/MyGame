@@ -4,16 +4,21 @@
  * 2025.5.16
  */
 
-import { _decorator, Color, Component, director, dynamicAtlasManager, gfx, ImageAsset, math, Node, path, profiler, Size, Sprite, SpriteFrame, Texture2D } from 'cc';
+import { _decorator, Color, Component, director, dynamicAtlasManager, gfx, ImageAsset, math, Node, path, profiler, Size, Sprite, SpriteFrame, Texture2D } from "cc";
 const { ccclass, property } = _decorator;
 
-interface Point { x: number; y: number };
+interface Point {
+    x: number;
+    y: number;
+}
 //formId从0开始
-interface PathInfo { fromId: number, toId: number };
+interface PathInfo {
+    fromId: number;
+    toId: number;
+}
 
-@ccclass('TextureClip')
+@ccclass("TextureClip")
 export class TextureClip extends Component {
-
     @property(Sprite)
     showSp: Sprite;
 
@@ -28,7 +33,7 @@ export class TextureClip extends Component {
 
     private _textureSize: math.Size;
 
-    private _pathSpfsInfo: { pathInfo: PathInfo, spFrame: SpriteFrame }[] = [];
+    private _pathSpfsInfo: { pathInfo: PathInfo; spFrame: SpriteFrame }[] = [];
 
     private _hideP: Point[] = [];
 
@@ -59,20 +64,10 @@ export class TextureClip extends Component {
         this._region = region;
 
         /**填充buffer */
-        director.root!.device.copyTextureToBuffers(
-            infoTex.getGFXTexture()!,
-            [infoBuffer],
-            [region]
-        );
+        director.root!.device.copyTextureToBuffers(infoTex.getGFXTexture()!, [infoBuffer], [region]);
 
-        director.root!.device.copyTextureToBuffers(
-            texture.getGFXTexture()!,
-            [showBuffer],
-            [region]
-        );
-
+        director.root!.device.copyTextureToBuffers(texture.getGFXTexture()!, [showBuffer], [region]);
     }
-
 
     private getHidePixels(segmentIndexs: number[]) {
         const height = this._region.texExtent.height;
@@ -95,12 +90,12 @@ export class TextureClip extends Component {
         const height = this._region.texExtent.height;
         const width = this._region.texExtent.width;
         const buffer = this._showBuffer;
-        this._hideP.forEach(p => {
+        this._hideP.forEach((p) => {
             const x = p.x;
             const y = p.y;
             const i = (y * width + x) * 4;
             buffer[i + 3] = 0;
-        })
+        });
 
         const imageAsset = new ImageAsset();
         imageAsset.reset({
@@ -118,21 +113,21 @@ export class TextureClip extends Component {
         newSpf.texture = texture;
         newSpf["packable"] = false;
 
-        const alreadyIndex = this._pathSpfsInfo.findIndex(spInfo => spInfo.pathInfo.fromId == pathInfo.fromId && spInfo.pathInfo.toId == pathInfo.toId);
+        const alreadyIndex = this._pathSpfsInfo.findIndex((spInfo) => spInfo.pathInfo.fromId == pathInfo.fromId && spInfo.pathInfo.toId == pathInfo.toId);
         if (alreadyIndex != -1) {
             this._pathSpfsInfo.splice(alreadyIndex, 1);
         }
         const newSpInfo = { pathInfo: pathInfo, spFrame: newSpf };
-        this._pathSpfsInfo.push({ pathInfo: pathInfo, spFrame: newSpf })
+        this._pathSpfsInfo.push({ pathInfo: pathInfo, spFrame: newSpf });
         return newSpInfo;
     }
 
-    public getPiexlsByRGBA(dat: { r?: number, g?: number, b?: number, a?: number }): { x: number, y: number }[] {
+    public getPiexlsByRGBA(dat: { r?: number; g?: number; b?: number; a?: number }): { x: number; y: number }[] {
         const channelIndexMap = { r: 0, g: 1, b: 2, a: 3 } as const;
         const height = this._region.texExtent.height;
         const width = this._region.texExtent.width;
         const buffer = this._infoBuffer;
-        let res: { x: number, y: number }[] = [];
+        let res: { x: number; y: number }[] = [];
         for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
                 const i = (y * width + x) * 4;
@@ -141,13 +136,12 @@ export class TextureClip extends Component {
                     const offset = channelIndexMap[name] ?? 0;
                     const bufferValue = buffer[i + offset];
                     if (dat[name] != undefined && dat[name] != bufferValue) isCheck = false;
-                })
-                if (isCheck) res.push({ x: x, y: y })
+                });
+                if (isCheck) res.push({ x: x, y: y });
             }
         }
         return res;
     }
-
 
     /**
      * 隐藏路径
@@ -156,8 +150,8 @@ export class TextureClip extends Component {
      * index从0开始
      */
     public hidePath(formIndex: number, toIndex: number) {
-        let spInfo = this._pathSpfsInfo.find(spInfo => spInfo.pathInfo.fromId == formIndex && spInfo.pathInfo.toId == toIndex);
-        let segmentIndexs: number[] = []
+        let spInfo = this._pathSpfsInfo.find((spInfo) => spInfo.pathInfo.fromId == formIndex && spInfo.pathInfo.toId == toIndex);
+        let segmentIndexs: number[] = [];
         //通过起点终点index获得段落index
         // segmentIndexs = formIndex  toIndex;
         if (!spInfo) {
@@ -168,12 +162,11 @@ export class TextureClip extends Component {
     }
 
     protected onDestroy(): void {
-        this._pathSpfsInfo?.forEach(info => {
+        this._pathSpfsInfo?.forEach((info) => {
             info.spFrame.decRef();
             info.spFrame?.texture.decRef();
-        })
+        });
     }
-
 
     public getSize() {
         return this._textureSize;
@@ -196,7 +189,4 @@ export class TextureClip extends Component {
 
         console.log(`r: ${r}  g: ${g}  b: ${b}  a: ${a}`);
     }
-
 }
-
-

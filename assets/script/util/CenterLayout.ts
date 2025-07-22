@@ -1,4 +1,3 @@
-
 /**
  * 描述: 居中layout
  * 创建人: hhy
@@ -16,15 +15,12 @@ enum CenterHorizontalDirection {
 
 @ccclass
 @disallowMultiple()
-@menu('自定义组件/CenterLayout')
-
+@menu("自定义组件/CenterLayout")
 export default class CenterLayout extends Layout {
     @property({
-        type: Enum(CenterHorizontalDirection)
+        type: Enum(CenterHorizontalDirection),
     })
     centerHorizontalDirection: CenterHorizontalDirection = CenterHorizontalDirection.CENTER_TO_SIDE;
-
-
 
     protected _doLayoutHorizontally(baseWidth: number, rowBreak: boolean, fnPositionY: (...args: any[]) => number, applyChildren: boolean): number {
         const trans = this.node._uiProps.uiTransformComp!;
@@ -50,7 +46,6 @@ export default class CenterLayout extends Layout {
         if (this._layoutType !== Layout.Type.GRID && this._resizeMode === Layout.ResizeMode.CHILDREN) {
             newChildWidth = (baseWidth - paddingH - (activeChildCount - 1) * this._spacingX) / activeChildCount;
         }
-
 
         const children = this._usefulLayoutObj;
         for (let i = 0; i < children.length; ++i) {
@@ -82,7 +77,7 @@ export default class CenterLayout extends Layout {
 
             if (rowBreak) {
                 if (limit > 0) {
-                    isBreak = (i / limit) > 0 && (i % limit === 0);
+                    isBreak = i / limit > 0 && i % limit === 0;
                     if (isBreak) {
                         rowMaxHeight = tempMaxHeight > childBoundingBoxHeight ? tempMaxHeight : rowMaxHeight;
                     }
@@ -120,10 +115,10 @@ export default class CenterLayout extends Layout {
 
         // --start--
         if (applyChildren && children.length > 0 && this.centerHorizontalDirection == CenterHorizontalDirection.CENTER_TO_SIDE) {
-            let lastRowY = Number.MIN_SAFE_INTEGER
+            let lastRowY = Number.MIN_SAFE_INTEGER;
             let childsWidth = 0;
             let offset = 0;
-            //倒序 
+            //倒序
             for (let i = children.length - 1; i >= 0; i--) {
                 const child = children[i];
                 const childScaleX = this._getUsedScaleValue(child.node.scale.x);
@@ -136,8 +131,7 @@ export default class CenterLayout extends Layout {
                         const childsLeftX = this.node.getWorldPosition().x - baseWidth * layoutAnchor.x;
                         childsWidth = childsRightX - childsLeftX;
                         offset = baseWidth / 2 - childsWidth / 2;
-                    }
-                    else if (this.horizontalDirection == Layout.HorizontalDirection.RIGHT_TO_LEFT) {
+                    } else if (this.horizontalDirection == Layout.HorizontalDirection.RIGHT_TO_LEFT) {
                         const childsRightX = this.node.getWorldPosition().x + baseWidth * layoutAnchor.x;
                         const childsLeftX = child.node.getWorldPosition().x - childAnchorX * childBoundingBoxWidth;
                         childsWidth = childsRightX - childsLeftX;
@@ -212,7 +206,7 @@ export default class CenterLayout extends Layout {
 
             if (columnBreak) {
                 if (limit > 0) {
-                    isBreak = (i / limit) > 0 && (i % limit === 0);
+                    isBreak = i / limit > 0 && i % limit === 0;
                     if (isBreak) {
                         colMaxWidth = tempMaxWidth > childBoundingBoxHeight ? tempMaxWidth : colMaxWidth;
                     }
@@ -249,10 +243,10 @@ export default class CenterLayout extends Layout {
         const containerResizeBoundary = Math.max(maxWidth, totalWidth + colMaxWidth) + this._getPaddingH();
         // --start--
         if (applyChildren && children.length > 0 && this.centerHorizontalDirection == CenterHorizontalDirection.CENTER_TO_SIDE) {
-            let lastColX = Number.MIN_SAFE_INTEGER
+            let lastColX = Number.MIN_SAFE_INTEGER;
             let childsHeight = 0;
             let offset = 0;
-            //倒序 
+            //倒序
             for (let i = children.length - 1; i >= 0; i--) {
                 const child = children[i];
                 const childScaleY = this._getUsedScaleValue(child.node.scale.y);
@@ -265,8 +259,7 @@ export default class CenterLayout extends Layout {
                         const childsBottomY = child.node.getWorldPosition().y - childAnchorY * childBoundingBoxHeight;
                         childsHeight = childsTopY - childsBottomY;
                         offset = -(baseHeight / 2 - childsHeight / 2);
-                    }
-                    else if (this.verticalDirection == Layout.VerticalDirection.BOTTOM_TO_TOP) {
+                    } else if (this.verticalDirection == Layout.VerticalDirection.BOTTOM_TO_TOP) {
                         const childsTopY = child.node.getWorldPosition().y + (1 - childAnchorY) * childBoundingBoxHeight;
                         const childsBottomY = this.node.getWorldPosition().y - layoutAnchor.y * baseHeight;
                         childsHeight = childsTopY - childsBottomY;

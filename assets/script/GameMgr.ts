@@ -1,18 +1,18 @@
-import { _decorator, Component, Node } from 'cc';
+import { _decorator, Component, Node } from "cc";
 const { ccclass, property } = _decorator;
 
 export enum GameMode {
-    PLAY = "PLAY",      //游玩模式
-    EDITOR = "EDITOR"   //地图编辑模式
+    PLAY = "PLAY", //游玩模式
+    EDITOR = "EDITOR", //地图编辑模式
 }
 
-@ccclass('GameMgr')
+@ccclass("GameMgr")
 export class GameMgr {
     private _gameMode: GameMode = GameMode.PLAY;
 
-    private static _instance:GameMgr = null;
+    private static _instance: GameMgr = null;
 
-    public static get Instance():GameMgr {
+    public static get Instance(): GameMgr {
         if (!this._instance) {
             this._instance = new GameMgr();
         }
@@ -26,8 +26,4 @@ export class GameMgr {
     public getGameMode() {
         return this._gameMode;
     }
-
-
 }
-
-

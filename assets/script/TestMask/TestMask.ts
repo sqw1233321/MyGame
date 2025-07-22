@@ -1,11 +1,13 @@
-import { _decorator, Component, director, dynamicAtlasManager, gfx, ImageAsset, Node, path, Sprite, SpriteFrame, Texture2D } from 'cc';
+import { _decorator, Component, director, dynamicAtlasManager, gfx, ImageAsset, Node, path, Sprite, SpriteFrame, Texture2D } from "cc";
 const { ccclass, property } = _decorator;
 
-interface Point { x: number; y: number };
+interface Point {
+    x: number;
+    y: number;
+}
 
-@ccclass('TestMask')
+@ccclass("TestMask")
 export class TestMask extends Component {
-
     @property(Sprite)
     sp: Sprite;
 
@@ -27,15 +29,15 @@ export class TestMask extends Component {
     private _buffer;
 
     private _nodes: {
-        id: number,
-        x: number,
-        y: number
+        id: number;
+        x: number;
+        y: number;
     }[] = [];
 
     private _pathInfo: {
-        fromId: number,
-        toId: number,
-        path: Point[]
+        fromId: number;
+        toId: number;
+        path: Point[];
     }[] = [];
 
     protected onLoad(): void {
@@ -49,7 +51,6 @@ export class TestMask extends Component {
         let texture_size = this.sp.trim ? spf.rect : spf.originalSize;
         texture_size = spf.originalSize;
 
-
         this._sprite_buffer_tab[texture.getHash()] = new Uint8Array(texture_size.width * texture_size.height * 4);
         const buffer = this._sprite_buffer_tab[texture.getHash()];
         const region = new gfx.BufferTextureCopy();
@@ -58,33 +59,28 @@ export class TestMask extends Component {
         region.texOffset.x = region.texOffset.y = 0;
         region.texExtent.width = texture_size.width;
         region.texExtent.height = texture_size.height;
-        director.root!.device.copyTextureToBuffers(
-            texture.getGFXTexture()!,
-            [buffer],
-            [region]
-        );
+        director.root!.device.copyTextureToBuffers(texture.getGFXTexture()!, [buffer], [region]);
         this.getNodes();
         this._nodes = [
             { id: 1, x: 5, y: 5 },
             { id: 2, x: 7, y: 24 },
             { id: 3, x: 22, y: 29 },
             { id: 4, x: 13, y: 18 },
-            { id: 5, x: 19, y: 14 }
-        ]
+            { id: 5, x: 19, y: 14 },
+        ];
         // this.getNodeInfo(6, 5);
         // this.getNodeInfo(5, 5);
         console.log(this._nodes);
         this._nodes.forEach((node, index) => {
-            let nextIndex = index + 1
+            let nextIndex = index + 1;
             if (nextIndex == this._nodes.length) nextIndex = 0;
             const nextNode = this._nodes[nextIndex];
             const path = this.findPath(index, node, nextNode, buffer, texture_size.width, texture_size.height);
             this._pathInfo.push({ fromId: index, toId: nextIndex, path: path });
             console.log(`路径像素：${index} --> ${nextIndex} :`, path);
-        })
+        });
         this.hidePath();
     }
-
 
     private getNodes() {
         const height = this._region.texExtent.height;
@@ -103,23 +99,14 @@ export class TestMask extends Component {
                     this._nodes.push({
                         id: a, // 用 alpha 作为节点编号
                         x: x,
-                        y: y
+                        y: y,
                     });
                 }
             }
         }
     }
 
-
-    private findPath(
-        index: number,
-        start: Point,
-        end: Point,
-        buffer: Uint8Array,
-        width: number,
-        height: number
-    ): Point[] | null {
-
+    private findPath(index: number, start: Point, end: Point, buffer: Uint8Array, width: number, height: number): Point[] | null {
         const id = index;
 
         const visited = new Set<string>();
@@ -131,8 +118,14 @@ export class TestMask extends Component {
         visited.add(key(start.x, start.y));
 
         const dirs = [
-            [0, 1], [1, 0], [0, -1], [-1, 0],
-            [1, 1], [-1, 1], [1, -1], [-1, -1],
+            [0, 1],
+            [1, 0],
+            [0, -1],
+            [-1, 0],
+            [1, 1],
+            [-1, 1],
+            [1, -1],
+            [-1, -1],
         ]; // 8方向
 
         while (queue.length > 0) {
@@ -145,11 +138,7 @@ export class TestMask extends Component {
                 const nx = point.x + dx;
                 const ny = point.y + dy;
 
-                if (
-                    nx >= 0 && ny >= 0 &&
-                    nx < width && ny < height &&
-                    this.isRed(nx, ny, buffer, width)
-                ) {
+                if (nx >= 0 && ny >= 0 && nx < width && ny < height && this.isRed(nx, ny, buffer, width)) {
                     const k = key(nx, ny);
                     if (!visited.has(k)) {
                         visited.add(k);
@@ -184,9 +173,9 @@ export class TestMask extends Component {
             const pathX = p.x;
             const pathY = p.y;
             const i = (pathY * width + pathX) * 4;
-            this.checkRoundPoint({ x: pathX, y: pathY }, startP, endP)
-            buffer[i + 3] = 0
-        })
+            this.checkRoundPoint({ x: pathX, y: pathY }, startP, endP);
+            buffer[i + 3] = 0;
+        });
 
         const imageAsset = new ImageAsset({
             _data: buffer,
@@ -204,12 +193,10 @@ export class TestMask extends Component {
 
         // 设置给你的 Sprite 组件
         this.sp.spriteFrame = spriteFrame;
-
     }
 
     private checkRoundPoint(centerP: Point, StartP: Point, EndP: Point) {
         const width = this._region.texExtent.width;
-
 
         const isNearStart = this.getDistSqr(centerP.x, centerP.y, StartP.x, StartP.y) <= this.stopRadius * this.stopRadius;
         const isNearEnd = this.getDistSqr(centerP.x, centerP.y, EndP.x, EndP.y) <= this.stopRadius * this.stopRadius;
@@ -220,13 +207,19 @@ export class TestMask extends Component {
         const i = (centerP.y * width + centerP.x) * 4;
         this._buffer[i + 3] = 0;
         const dirs = [
-            [0, 1], [1, 0], [0, -1], [-1, 0],
-            [1, 1], [-1, 1], [1, -1], [-1, -1],
+            [0, 1],
+            [1, 0],
+            [0, -1],
+            [-1, 0],
+            [1, 1],
+            [-1, 1],
+            [1, -1],
+            [-1, -1],
         ]; // 8方向
         for (const [dx, dy] of dirs) {
             const nx = centerP.x + dx;
             const ny = centerP.y + dy;
-            this.checkRoundPoint({ x: nx, y: ny }, StartP, EndP)
+            this.checkRoundPoint({ x: nx, y: ny }, StartP, EndP);
         }
     }
 
@@ -249,9 +242,4 @@ export class TestMask extends Component {
 
         console.log(`r: ${r}  g: ${g}  b: ${b}  a: ${a}`);
     }
-
-
-
 }
-
-
